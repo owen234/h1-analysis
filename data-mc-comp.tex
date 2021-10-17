@@ -1,0 +1,90 @@
+ \documentclass[11pt]{article}
+  \usepackage{rotating}
+  \usepackage{pdflscape}
+  \usepackage{graphicx}
+    \textwidth 7.0in
+    \textheight 9.5in
+    \topmargin -1.0in
+    \linewidth 7.0in
+    \oddsidemargin -0.3in
+    \evensidemargin -0.3in
+        \begin{document}
+
+
+ %%==================================================
+
+
+        \tableofcontents
+
+ \pagebreak
+
+
+%\setcounter{section}{-1}
+
+\section{ Description }
+
+2021-10-16 \\
+
+\vspace{1cm}
+
+The only event selection that I added, in addition to what's in the H1 ntuple making code,
+was to require $Q^2(e) > 220$~GeV$^2$ for both data and MC (Rapgap), where I chose to use
+the electron method evaluation of $Q^2$.
+
+The ntuples are in this directory: {\tt /data/owen/DIS-reco/h1-2021-10-14-v5f} \\
+and the files are \\
+{\tt dnn-output-h1-v2-Data.root} and {\tt dnn-output-h1-v2-Rapgap.root}.
+
+
+\section{ Event distributions }
+
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/event-vars.pdf} \\
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/sigma-dphi.pdf}
+
+
+
+ %%==================================================
+\section{ DNN inputs }
+
+\subsection{ Electron vars }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dnn-inputs-electron-vars.pdf}
+
+\subsection{ HFS vars }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dnn-inputs-hfs-vars.pdf}
+
+\subsection{ ISR vars }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dnn-inputs-isr-vars.pdf}
+
+\subsection{ FSR vars }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dnn-inputs-fsr-vars.pdf}
+
+
+\pagebreak
+
+ %%==================================================
+\section{ DNN outputs }
+
+For each set, I have two 2D hists for MC and one for data.
+The MC hists are DNN vs gen and DNN vs obs, where obs is
+the value from one of the standard methods.  The data
+hist is only the second type (DNN vs obs.).
+The idea is the obs is a proxy for the gen value, so that you can
+compare a 2D plot in MC with the same thing in data, where
+the plot is close to what you want (DNN vs gen).
+
+\subsection{ $Q^2$ }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dis-Q2-2d.pdf} \\
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dis-log10Q2-2d.pdf}
+
+\subsection{ $y$ }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dis-y-2d.pdf} \\
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dis-log10y-2d.pdf}
+
+\subsection{ $x$ }
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dis-x-2d.pdf} \\
+\includegraphics[width=0.98\linewidth]{plots-data-mc-comp/dis-log10x-2d.pdf}
+
+
+
+\end{document}
+
