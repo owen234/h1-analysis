@@ -1,0 +1,12 @@
+
+
+gSystem -> Load( "../RooUnfold/build/libRooUnfold.dylib" ) ;
+
+
+.L data_roo_unfold_2d_compare_v2.c
+
+data_roo_unfold_2d_compare_v2("rur_2D_log10_q2_vs_log10_y_dnn","h_data_log10_q2_vs_log10_y_obs_dnn","rur_2D_log10_q2_vs_log10_y_esigma","h_data_log10_q2_vs_log10_y_obs_esigma",2,1000,"rapgap-for-q2-vs-y-gen012_obs024-0.05-gen-good.root","fake-data-hists-seed-1.root","DNN","eSigma")
+
+
+
+
