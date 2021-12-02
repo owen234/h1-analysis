@@ -29,6 +29,13 @@
       return rp ;
    }
 
+   TH2F* fget_hist2d( const char* hname, TFile* tfp ) {
+      if ( tfp == 0x0 ) { printf("\n\n *** fget_hist : bad file pointer.\n\n") ; gSystem -> Exit(-1) ; }
+      TH2F* rp = (TH2F*) tfp -> Get( hname ) ;
+      if ( rp == 0x0 ) { printf("\n\n *** Missing hist %s\n\n", hname ) ; gSystem -> Exit(-1) ; }
+      return rp ;
+   }
+
    TGraph* get_graph( const char* gname ) {
       TGraph* rp = (TGraph*) gDirectory -> FindObject( gname ) ;
       if ( rp == 0x0 ) { printf("\n\n *** Missing TGraph %s\n\n", gname ) ; gSystem -> Exit(-1) ; }

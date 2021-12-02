@@ -160,8 +160,8 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
                      const char* h_data_name_b = "h_data_log10_q2_vs_log10_y_obs_esigma",
                      int method_index = 2,
                      int n_iter = 1000,  // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
-                     const char* response_input_file = "rapgap-for-q2-vs-y-gen012_obs024-0.05-gen-good.root",
-                     const char* data_input_file = "data-hists.root",
+                     const char* response_input_file = "rapgap-for-q2-vs-y-gen012_obs024-0.05-obs-good.root",
+                     const char* data_input_file = "fake-data-hists-seed-1-obs-good.root",
                      const char* method_name_a = "DNN",
                      const char* method_name_b = "eSigma"
                      ) {
@@ -495,6 +495,7 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       TH1F* h_unfolding_result_err_trimmed_a = trim_unused_bins( h_unfolding_result_err_a, rur_a ) ;
       TH1F* h_1d_unfolded_val_trimmed_a = trim_unused_bins( h_1d_unfolded_val_a, rur_a ) ;
       TH1F* h_1d_gen_val_trimmed_a = trim_unused_bins( h_1d_gen_val_a, rur_a ) ;
+      h_1d_gen_val_trimmed_a -> Scale( ( h_1d_unfolded_val_trimmed_a -> Integral() ) / ( h_1d_gen_val_trimmed_a -> Integral() ) ) ;
 
       TH2F* h_unfold_cov_mat_trimmed_b = trim_unused_bins( h_unfold_cov_mat_b, rur_b ) ;
       TH2F* h_unfold_cor_mat_trimmed_b = trim_unused_bins( h_unfold_cor_mat_b, rur_b ) ;
@@ -502,6 +503,7 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       TH1F* h_unfolding_result_err_trimmed_b = trim_unused_bins( h_unfolding_result_err_b, rur_b ) ;
       TH1F* h_1d_unfolded_val_trimmed_b = trim_unused_bins( h_1d_unfolded_val_b, rur_b ) ;
       TH1F* h_1d_gen_val_trimmed_b = trim_unused_bins( h_1d_gen_val_b, rur_b ) ;
+      h_1d_gen_val_trimmed_b -> Scale( ( h_1d_unfolded_val_trimmed_b -> Integral() ) / ( h_1d_gen_val_trimmed_b -> Integral() ) ) ;
 
 
       h_1d_unfolded_val_trimmed_a -> SetXTitle( "Global unfolded bin number") ;

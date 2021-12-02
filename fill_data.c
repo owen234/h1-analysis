@@ -10,7 +10,7 @@
 #include "RooUnfoldBayes.h"
 #include "RooUnfoldTUnfold.h"
 
-void fill_data::Loop( const char* rur_file_name )
+void fill_data::Loop( int number_of_events, const char* rur_file_name )
 {
    if (fChain == 0) return;
 

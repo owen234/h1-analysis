@@ -96,6 +96,22 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
 
 
 
+   TH2F* h_log10_q2_vs_log10_y_obs_dnn_sel = new TH2F( "h_log10_q2_vs_log10_y_obs_dnn_sel", "Obs, log10 Q2 vs log10 y, DNN selection",
+        nbins_obs, log10_ymin, log10_ymax,    nbins_obs, log10_q2min, log10_q2max ) ;
+
+   TH2F* h_log10_q2_vs_log10_y_obs_e_sel = new TH2F( "h_log10_q2_vs_log10_y_obs_e_sel", "Obs, log10 Q2 vs log10 y, electron selection",
+        nbins_obs, log10_ymin, log10_ymax,    nbins_obs, log10_q2min, log10_q2max ) ;
+
+   TH2F* h_log10_q2_vs_log10_y_obs_isigma_sel = new TH2F( "h_log10_q2_vs_log10_y_obs_isigma_sel", "Obs, log10 Q2 vs log10 y, ISigma selection",
+        nbins_obs, log10_ymin, log10_ymax,    nbins_obs, log10_q2min, log10_q2max ) ;
+
+   TH2F* h_log10_q2_vs_log10_y_obs_esigma_sel = new TH2F( "h_log10_q2_vs_log10_y_obs_esigma_sel", "Obs, log10 Q2 vs log10 y, eSigma selection",
+        nbins_obs, log10_ymin, log10_ymax,    nbins_obs, log10_q2min, log10_q2max ) ;
+
+   TH2F* h_log10_q2_vs_log10_y_obs_da_sel = new TH2F( "h_log10_q2_vs_log10_y_obs_da_sel", "Obs, log10 Q2 vs log10 y, DA selection",
+        nbins_obs, log10_ymin, log10_ymax,    nbins_obs, log10_q2min, log10_q2max ) ;
+
+
 
 
 
@@ -306,7 +322,7 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
       float log10_gen_y = log10(from_tlv_gen_y) ;
 
 
-      h_log10_q2_vs_log10_y_gen_no_cuts -> Fill( log10_gen_y, log10_gen_Q2 ) ;
+      h_log10_q2_vs_log10_y_gen_no_cuts -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
 
 
      //----------  DNN
@@ -329,7 +345,9 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
          rur_2D_log10_q2_vs_log10_x_dnn    -> Fill( log10_dnn_x, log10_dnn_Q2,   log10_gen_x, log10_gen_Q2,  wgt ) ;
          rur_2D_log10_q2_vs_log10_y_dnn    -> Fill( log10_dnn_y, log10_dnn_Q2,   log10_gen_y, log10_gen_Q2,  wgt ) ;
 
-         h_log10_q2_vs_log10_y_gen_dnn_sel -> Fill( log10_gen_y, log10_gen_Q2 ) ;
+         h_log10_q2_vs_log10_y_gen_dnn_sel -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
+
+         h_log10_q2_vs_log10_y_obs_dnn_sel -> Fill( log10_dnn_y, log10_dnn_Q2, wgt ) ;
 
       }
 
@@ -349,14 +367,16 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
          h_log10_q2_gen_vs_obs_e -> Fill( log10_e_Q2, log10_gen_Q2, wgt ) ;
          h_log10_x_gen_vs_obs_e -> Fill( log10_e_x, log10_gen_x, wgt ) ;
          h_log10_y_gen_vs_obs_e -> Fill( log10_e_y, log10_gen_y, wgt ) ;
-         h_x_gen_vs_obs_e -> Fill( (dnn_x), from_tlv_gen_x, wgt ) ;
+         h_x_gen_vs_obs_e -> Fill( obs_x_e, from_tlv_gen_x, wgt ) ;
          rur_log10_q2_gen_vs_obs_e -> Fill( log10_e_Q2, log10_gen_Q2, wgt ) ;
          rur_log10_x_gen_vs_obs_e -> Fill( log10_e_x, log10_gen_x, wgt ) ;
          rur_log10_y_gen_vs_obs_e -> Fill( log10_e_y, log10_gen_y, wgt ) ;
          rur_2D_log10_q2_vs_log10_x_e    -> Fill( log10_e_x, log10_e_Q2,   log10_gen_x, log10_gen_Q2,  wgt ) ;
          rur_2D_log10_q2_vs_log10_y_e    -> Fill( log10_e_y, log10_e_Q2,   log10_gen_y, log10_gen_Q2,  wgt ) ;
 
-         h_log10_q2_vs_log10_y_gen_e_sel -> Fill( log10_gen_y, log10_gen_Q2 ) ;
+         h_log10_q2_vs_log10_y_gen_e_sel -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
+
+         h_log10_q2_vs_log10_y_obs_e_sel -> Fill( log10_e_y, log10_e_Q2, wgt ) ;
 
       }
 
@@ -377,14 +397,16 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
          h_log10_q2_gen_vs_obs_isigma -> Fill( log10_isigma_Q2, log10_gen_Q2, wgt ) ;
          h_log10_x_gen_vs_obs_isigma -> Fill( log10_isigma_x, log10_gen_x, wgt ) ;
          h_log10_y_gen_vs_obs_isigma -> Fill( log10_isigma_y, log10_gen_y, wgt ) ;
-         h_x_gen_vs_obs_isigma -> Fill( (dnn_x), from_tlv_gen_x, wgt ) ;
+         h_x_gen_vs_obs_isigma -> Fill( obs_x_ISigma, from_tlv_gen_x, wgt ) ;
          rur_log10_q2_gen_vs_obs_isigma -> Fill( log10_isigma_Q2, log10_gen_Q2, wgt ) ;
          rur_log10_x_gen_vs_obs_isigma -> Fill( log10_isigma_x, log10_gen_x, wgt ) ;
          rur_log10_y_gen_vs_obs_isigma -> Fill( log10_isigma_y, log10_gen_y, wgt ) ;
          rur_2D_log10_q2_vs_log10_x_isigma    -> Fill( log10_isigma_x, log10_isigma_Q2,   log10_gen_x, log10_gen_Q2,  wgt ) ;
          rur_2D_log10_q2_vs_log10_y_isigma    -> Fill( log10_isigma_y, log10_isigma_Q2,   log10_gen_y, log10_gen_Q2,  wgt ) ;
 
-         h_log10_q2_vs_log10_y_gen_isigma_sel -> Fill( log10_gen_y, log10_gen_Q2 ) ;
+         h_log10_q2_vs_log10_y_gen_isigma_sel -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
+
+         h_log10_q2_vs_log10_y_obs_isigma_sel -> Fill( log10_isigma_y, log10_isigma_Q2, wgt ) ;
 
       }
 
@@ -404,14 +426,16 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
          h_log10_q2_gen_vs_obs_esigma -> Fill( log10_esigma_Q2, log10_gen_Q2, wgt ) ;
          h_log10_x_gen_vs_obs_esigma -> Fill( log10_esigma_x, log10_gen_x, wgt ) ;
          h_log10_y_gen_vs_obs_esigma -> Fill( log10_esigma_y, log10_gen_y, wgt ) ;
-         h_x_gen_vs_obs_esigma -> Fill( (dnn_x), from_tlv_gen_x, wgt ) ;
+         h_x_gen_vs_obs_esigma -> Fill( obs_x_eSigma, from_tlv_gen_x, wgt ) ;
          rur_log10_q2_gen_vs_obs_esigma -> Fill( log10_esigma_Q2, log10_gen_Q2, wgt ) ;
          rur_log10_x_gen_vs_obs_esigma -> Fill( log10_esigma_x, log10_gen_x, wgt ) ;
          rur_log10_y_gen_vs_obs_esigma -> Fill( log10_esigma_y, log10_gen_y, wgt ) ;
          rur_2D_log10_q2_vs_log10_x_esigma    -> Fill( log10_esigma_x, log10_esigma_Q2,   log10_gen_x, log10_gen_Q2,  wgt ) ;
          rur_2D_log10_q2_vs_log10_y_esigma    -> Fill( log10_esigma_y, log10_esigma_Q2,   log10_gen_y, log10_gen_Q2,  wgt ) ;
 
-         h_log10_q2_vs_log10_y_gen_esigma_sel -> Fill( log10_gen_y, log10_gen_Q2 ) ;
+         h_log10_q2_vs_log10_y_gen_esigma_sel -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
+
+         h_log10_q2_vs_log10_y_obs_esigma_sel -> Fill( log10_esigma_y, log10_esigma_Q2, wgt ) ;
 
       }
 
@@ -431,14 +455,16 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
          h_log10_q2_gen_vs_obs_da -> Fill( log10_da_Q2, log10_gen_Q2, wgt ) ;
          h_log10_x_gen_vs_obs_da -> Fill( log10_da_x, log10_gen_x, wgt ) ;
          h_log10_y_gen_vs_obs_da -> Fill( log10_da_y, log10_gen_y, wgt ) ;
-         h_x_gen_vs_obs_da -> Fill( (dnn_x), from_tlv_gen_x, wgt ) ;
+         h_x_gen_vs_obs_da -> Fill( obs_x_DA, from_tlv_gen_x, wgt ) ;
          rur_log10_q2_gen_vs_obs_da -> Fill( log10_da_Q2, log10_gen_Q2, wgt ) ;
          rur_log10_x_gen_vs_obs_da -> Fill( log10_da_x, log10_gen_x, wgt ) ;
          rur_log10_y_gen_vs_obs_da -> Fill( log10_da_y, log10_gen_y, wgt ) ;
          rur_2D_log10_q2_vs_log10_x_da    -> Fill( log10_da_x, log10_da_Q2,   log10_gen_x, log10_gen_Q2,  wgt ) ;
          rur_2D_log10_q2_vs_log10_y_da    -> Fill( log10_da_y, log10_da_Q2,   log10_gen_y, log10_gen_Q2,  wgt ) ;
 
-         h_log10_q2_vs_log10_y_gen_da_sel -> Fill( log10_gen_y, log10_gen_Q2 ) ;
+         h_log10_q2_vs_log10_y_gen_da_sel -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
+
+         h_log10_q2_vs_log10_y_obs_da_sel -> Fill( log10_da_y, log10_da_Q2, wgt ) ;
 
       }
 
