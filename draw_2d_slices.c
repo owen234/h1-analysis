@@ -2,6 +2,8 @@
 
    void draw_2d_slices( TH1* hp, bool do_logy = false, const char* htitle = "" ) {
 
+      printf("\n\n At beginning of draw_2d_slices for %s.\n\n", hp->GetName() ) ; fflush(stdout) ;
+
       char hname[100] ;
 
       int nbx = hp -> GetNbinsX() ;
@@ -13,8 +15,8 @@
       int first_ybin = 2 ;
       int last_ybin = nby-1 ;
 
-      float xaxis_min = hp -> GetXaxis() -> GetBinLowEdge( first_xbin ) ;
-      float xaxis_max = hp -> GetXaxis() -> GetBinLowEdge( last_xbin + 1 ) ;
+      /////////float xaxis_min = hp -> GetXaxis() -> GetBinLowEdge( first_xbin ) ;
+      /////////float xaxis_max = hp -> GetXaxis() -> GetBinLowEdge( last_xbin + 1 ) ;
       int nbins_slice = last_xbin - first_xbin + 1 ;
 
 
@@ -30,14 +32,15 @@
          sprintf( hname, "%s_yb%02d", hp -> GetName(), ybi ) ;
          printf("  Making %s\n", hname ) ;
 
-         TH1F* h1dslice = new TH1F( hname, hname, nbins_slice, xaxis_min, xaxis_max ) ;
+         ///////////TH1F* h1dslice = new TH1F( hname, hname, nbins_slice, xaxis_min, xaxis_max ) ;
+         TH1F* h1dslice = new TH1F( hname, hname, nbins_slice, hp -> GetXaxis() -> GetXbins() -> GetArray() ) ;
 
          for ( int xbi = first_xbin; xbi <= last_xbin; xbi ++ ) {
             float xaxis_val = hp -> GetXaxis() -> GetBinCenter( xbi ) ;
             int slice_bin = h1dslice -> FindBin( xaxis_val ) ;
             h1dslice -> SetBinContent( slice_bin, hp -> GetBinContent( xbi, ybi ) ) ;
             h1dslice -> SetBinError( slice_bin, hp -> GetBinError( xbi, ybi ) ) ;
-            printf("  bin %2d : %9.1f +/- %5.1f | ", slice_bin, hp -> GetBinContent( xbi, ybi ), hp -> GetBinError( xbi, ybi ) ) ;
+            printf("  xbi %3d, x val %9.5f, bin %2d : %9.1f +/- %5.1f | \n ", xbi, xaxis_val, slice_bin, hp -> GetBinContent( xbi, ybi ), hp -> GetBinError( xbi, ybi ) ) ;
          } // xbi
          printf("\n") ;
 
@@ -63,17 +66,17 @@
             h1dslice -> DrawCopy("hist l same") ;
          }
 
-         char label[100] ;
-         float bin_log10q2min = hp -> GetYaxis() -> GetBinLowEdge( ybi ) ;
-         float bin_log10q2max = hp -> GetYaxis() -> GetBinLowEdge( ybi+1 ) ;
-         sprintf( label, "bin %2d : Q2 range [%4.0f, %4.0f]", ybi, pow(10.,bin_log10q2min), pow(10,bin_log10q2max)  ) ;
-         legend -> AddEntry( h1dslice, label ) ;
+///      char label[100] ;
+///      float bin_log10q2min = hp -> GetYaxis() -> GetBinLowEdge( ybi ) ;
+///      float bin_log10q2max = hp -> GetYaxis() -> GetBinLowEdge( ybi+1 ) ;
+///      sprintf( label, "bin %2d : Q2 range [%4.0f, %4.0f]", ybi, pow(10.,bin_log10q2min), pow(10,bin_log10q2max)  ) ;
+///      legend -> AddEntry( h1dslice, label ) ;
 
       } // ybi
 
       legend -> Draw() ;
 
-
+      printf("\n\n At end of draw_2d_slices for %s.\n\n", hp->GetName() ) ; fflush(stdout) ;
 
 
    }

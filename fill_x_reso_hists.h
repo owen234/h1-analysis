@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Nov 19 08:15:12 2021 by ROOT version 6.24/01
+// Wed Oct 27 11:38:02 2021 by ROOT version 6.24/01
 // from TChain dnnout/
 //////////////////////////////////////////////////////////
 
-#ifndef fill_data_h
-#define fill_data_h
+#ifndef fill_x_reso_hists_h
+#define fill_x_reso_hists_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -13,7 +13,7 @@
 
 // Header file for the classes stored in the TTree if any.
 
-class fill_data {
+class fill_x_reso_hists {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -21,6 +21,8 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
+   Char_t          has_isr;
+   Char_t          has_fsr;
    Float_t         tower_sum_40;
    Long64_t        n_towers_40;
    Float_t         eta_pho_closest_to_ebeam;
@@ -53,6 +55,9 @@ public :
    Float_t         obs_Q2_IDA;
    Float_t         obs_Q2_ThetaSigmagamma;
    Float_t         obs_Q2_eSigma;
+   Float_t         from_tlv_gen_Q2;
+   Float_t         from_tlv_gen_x;
+   Float_t         from_tlv_gen_y;
    Float_t         obs_e_e;
    Float_t         obs_e_pz;
    Float_t         obs_e_pt;
@@ -62,10 +67,20 @@ public :
    Float_t         obs_hfs_pt;
    Float_t         obs_hfs_phi;
    Float_t         obs_dphi;
+   Float_t         gen_e_e;
+   Float_t         gen_e_pz;
+   Float_t         gen_e_pt;
+   Float_t         gen_e_phi;
+   Float_t         gen_hfs_e;
+   Float_t         gen_hfs_pz;
+   Float_t         gen_hfs_pt;
+   Float_t         gen_hfs_phi;
+   Float_t         gen_dphi;
    Float_t         Empz;
    Float_t         obs_e_trk_e;
    Float_t         beam_e_e;
    Float_t         beam_p_e;
+   Float_t         wgt;
    Float_t         obs_hfs_Empz;
    Float_t         obs_e_Empz;
    Float_t         obs_event_Empz;
@@ -78,11 +93,14 @@ public :
    Float_t         obs_ptbal;
    Float_t         obs_pzbal;
    Float_t         obs_hfs_theta;
+   Bool_t          pass_evt_sel;
    Float_t         dnn_x;
    Float_t         dnn_y;
    Float_t         dnn_Q2;
 
    // List of branches
+   TBranch        *b_has_isr;   //!
+   TBranch        *b_has_fsr;   //!
    TBranch        *b_tower_sum_40;   //!
    TBranch        *b_n_towers_40;   //!
    TBranch        *b_eta_pho_closest_to_ebeam;   //!
@@ -115,6 +133,9 @@ public :
    TBranch        *b_obs_Q2_IDA;   //!
    TBranch        *b_obs_Q2_ThetaSigmagamma;   //!
    TBranch        *b_obs_Q2_eSigma;   //!
+   TBranch        *b_from_tlv_gen_Q2;   //!
+   TBranch        *b_from_tlv_gen_x;   //!
+   TBranch        *b_from_tlv_gen_y;   //!
    TBranch        *b_obs_e_e;   //!
    TBranch        *b_obs_e_pz;   //!
    TBranch        *b_obs_e_pt;   //!
@@ -124,10 +145,20 @@ public :
    TBranch        *b_obs_hfs_pt;   //!
    TBranch        *b_obs_hfs_phi;   //!
    TBranch        *b_obs_dphi;   //!
+   TBranch        *b_gen_e_e;   //!
+   TBranch        *b_gen_e_pz;   //!
+   TBranch        *b_gen_e_pt;   //!
+   TBranch        *b_gen_e_phi;   //!
+   TBranch        *b_gen_hfs_e;   //!
+   TBranch        *b_gen_hfs_pz;   //!
+   TBranch        *b_gen_hfs_pt;   //!
+   TBranch        *b_gen_hfs_phi;   //!
+   TBranch        *b_gen_dphi;   //!
    TBranch        *b_Empz;   //!
    TBranch        *b_obs_e_trk_e;   //!
    TBranch        *b_beam_e_e;   //!
    TBranch        *b_beam_p_e;   //!
+   TBranch        *b_wgt;   //!
    TBranch        *b_obs_hfs_Empz;   //!
    TBranch        *b_obs_e_Empz;   //!
    TBranch        *b_obs_event_Empz;   //!
@@ -140,65 +171,53 @@ public :
    TBranch        *b_obs_ptbal;   //!
    TBranch        *b_obs_pzbal;   //!
    TBranch        *b_obs_hfs_theta;   //!
+   TBranch        *b_pass_evt_sel;   //!
    TBranch        *b_dnn_x;   //!
    TBranch        *b_dnn_y;   //!
    TBranch        *b_dnn_Q2;   //!
 
-   fill_data(TTree *tree=0);
-   virtual ~fill_data();
+   fill_x_reso_hists( const char* input_file_pattern = "dnn-output-h1-v2-Rapgap.root" );
+   //fill_x_reso_hists( const char* input_file_pattern = "/Volumes/Ext_2020_08/dis-reco-work/h1-2021-10-14-v5f/dnn-output-h1-v2-Rapgap-all-events.root" );
+   virtual ~fill_x_reso_hists();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop( const char* rur_file_name = "rapgap-for-q2-vs-y-gen012_obs024-0.05-obs-good.root" );
+   virtual void     Loop( bool fine_binning = false, bool verbose=false, int last_event=-1, int first_event=0, const char* out_file = "" );
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
 
-#ifdef fill_data_cxx
-fill_data::fill_data(TTree *tree) : fChain(0) 
+#ifdef fill_x_reso_hists_cxx
+fill_x_reso_hists::fill_x_reso_hists( const char* input_file_pattern ) : fChain(0) 
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
+   TChain* chain = new TChain("dnnout") ;
+   int nfiles = chain -> Add( input_file_pattern ) ;
+   if ( nfiles <= 0 ) { printf("\n\n *** No files match %s\n\n", input_file_pattern ) ; gSystem -> Exit(-1) ; }
+   int nevts = chain -> GetEntries() ;
+   if ( nevts <= 0 ) { printf("\n\n *** No events in file(s) matching %s\n\n", input_file_pattern ) ; gSystem -> Exit(-1) ; }
 
-#ifdef SINGLE_TREE
-      // The following code should be used if you want this class to access
-      // a single tree instead of a chain
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dnn-output-h1-v2-Data_nominal.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("dnn-output-h1-v2-Data_nominal.root");
-      }
-      f->GetObject("dnnout",tree);
+   printf("\n\n Found %d file(s) matching %s.  Nevts = %d\n\n", nfiles, input_file_pattern, nevts ) ;
 
-#else // SINGLE_TREE
-
-      // The following code should be used if you want this class to access a chain
-      // of trees.
-      TChain * chain = new TChain("dnnout","");
-      chain->Add("dnn-output-h1-v2-Data_nominal.root/dnnout");
-      tree = chain;
-#endif // SINGLE_TREE
-
-   }
+   TTree* tree = chain;
    Init(tree);
 }
 
-fill_data::~fill_data()
+fill_x_reso_hists::~fill_x_reso_hists()
 {
    if (!fChain) return;
    delete fChain->GetCurrentFile();
 }
 
-Int_t fill_data::GetEntry(Long64_t entry)
+Int_t fill_x_reso_hists::GetEntry(Long64_t entry)
 {
 // Read contents of entry.
    if (!fChain) return 0;
    return fChain->GetEntry(entry);
 }
-Long64_t fill_data::LoadTree(Long64_t entry)
+Long64_t fill_x_reso_hists::LoadTree(Long64_t entry)
 {
 // Set the environment to read one entry
    if (!fChain) return -5;
@@ -211,7 +230,7 @@ Long64_t fill_data::LoadTree(Long64_t entry)
    return centry;
 }
 
-void fill_data::Init(TTree *tree)
+void fill_x_reso_hists::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the branch addresses and branch
@@ -227,6 +246,8 @@ void fill_data::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
+   fChain->SetBranchAddress("has_isr", &has_isr, &b_has_isr);
+   fChain->SetBranchAddress("has_fsr", &has_fsr, &b_has_fsr);
    fChain->SetBranchAddress("tower_sum_40", &tower_sum_40, &b_tower_sum_40);
    fChain->SetBranchAddress("n_towers_40", &n_towers_40, &b_n_towers_40);
    fChain->SetBranchAddress("eta_pho_closest_to_ebeam", &eta_pho_closest_to_ebeam, &b_eta_pho_closest_to_ebeam);
@@ -259,6 +280,9 @@ void fill_data::Init(TTree *tree)
    fChain->SetBranchAddress("obs_Q2_IDA", &obs_Q2_IDA, &b_obs_Q2_IDA);
    fChain->SetBranchAddress("obs_Q2_ThetaSigmagamma", &obs_Q2_ThetaSigmagamma, &b_obs_Q2_ThetaSigmagamma);
    fChain->SetBranchAddress("obs_Q2_eSigma", &obs_Q2_eSigma, &b_obs_Q2_eSigma);
+   fChain->SetBranchAddress("from_tlv_gen_Q2", &from_tlv_gen_Q2, &b_from_tlv_gen_Q2);
+   fChain->SetBranchAddress("from_tlv_gen_x", &from_tlv_gen_x, &b_from_tlv_gen_x);
+   fChain->SetBranchAddress("from_tlv_gen_y", &from_tlv_gen_y, &b_from_tlv_gen_y);
    fChain->SetBranchAddress("obs_e_e", &obs_e_e, &b_obs_e_e);
    fChain->SetBranchAddress("obs_e_pz", &obs_e_pz, &b_obs_e_pz);
    fChain->SetBranchAddress("obs_e_pt", &obs_e_pt, &b_obs_e_pt);
@@ -268,10 +292,20 @@ void fill_data::Init(TTree *tree)
    fChain->SetBranchAddress("obs_hfs_pt", &obs_hfs_pt, &b_obs_hfs_pt);
    fChain->SetBranchAddress("obs_hfs_phi", &obs_hfs_phi, &b_obs_hfs_phi);
    fChain->SetBranchAddress("obs_dphi", &obs_dphi, &b_obs_dphi);
+   fChain->SetBranchAddress("gen_e_e", &gen_e_e, &b_gen_e_e);
+   fChain->SetBranchAddress("gen_e_pz", &gen_e_pz, &b_gen_e_pz);
+   fChain->SetBranchAddress("gen_e_pt", &gen_e_pt, &b_gen_e_pt);
+   fChain->SetBranchAddress("gen_e_phi", &gen_e_phi, &b_gen_e_phi);
+   fChain->SetBranchAddress("gen_hfs_e", &gen_hfs_e, &b_gen_hfs_e);
+   fChain->SetBranchAddress("gen_hfs_pz", &gen_hfs_pz, &b_gen_hfs_pz);
+   fChain->SetBranchAddress("gen_hfs_pt", &gen_hfs_pt, &b_gen_hfs_pt);
+   fChain->SetBranchAddress("gen_hfs_phi", &gen_hfs_phi, &b_gen_hfs_phi);
+   fChain->SetBranchAddress("gen_dphi", &gen_dphi, &b_gen_dphi);
    fChain->SetBranchAddress("Empz", &Empz, &b_Empz);
    fChain->SetBranchAddress("obs_e_trk_e", &obs_e_trk_e, &b_obs_e_trk_e);
    fChain->SetBranchAddress("beam_e_e", &beam_e_e, &b_beam_e_e);
    fChain->SetBranchAddress("beam_p_e", &beam_p_e, &b_beam_p_e);
+   fChain->SetBranchAddress("wgt", &wgt, &b_wgt);
    fChain->SetBranchAddress("obs_hfs_Empz", &obs_hfs_Empz, &b_obs_hfs_Empz);
    fChain->SetBranchAddress("obs_e_Empz", &obs_e_Empz, &b_obs_e_Empz);
    fChain->SetBranchAddress("obs_event_Empz", &obs_event_Empz, &b_obs_event_Empz);
@@ -284,13 +318,14 @@ void fill_data::Init(TTree *tree)
    fChain->SetBranchAddress("obs_ptbal", &obs_ptbal, &b_obs_ptbal);
    fChain->SetBranchAddress("obs_pzbal", &obs_pzbal, &b_obs_pzbal);
    fChain->SetBranchAddress("obs_hfs_theta", &obs_hfs_theta, &b_obs_hfs_theta);
+   fChain->SetBranchAddress("pass_evt_sel", &pass_evt_sel, &b_pass_evt_sel);
    fChain->SetBranchAddress("dnn_x", &dnn_x, &b_dnn_x);
    fChain->SetBranchAddress("dnn_y", &dnn_y, &b_dnn_y);
    fChain->SetBranchAddress("dnn_Q2", &dnn_Q2, &b_dnn_Q2);
    Notify();
 }
 
-Bool_t fill_data::Notify()
+Bool_t fill_x_reso_hists::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -301,18 +336,18 @@ Bool_t fill_data::Notify()
    return kTRUE;
 }
 
-void fill_data::Show(Long64_t entry)
+void fill_x_reso_hists::Show(Long64_t entry)
 {
 // Print contents of entry.
 // If entry is not specified, print current entry
    if (!fChain) return;
    fChain->Show(entry);
 }
-Int_t fill_data::Cut(Long64_t entry)
+Int_t fill_x_reso_hists::Cut(Long64_t entry)
 {
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
 }
-#endif // #ifdef fill_data_cxx
+#endif // #ifdef fill_x_reso_hists_cxx

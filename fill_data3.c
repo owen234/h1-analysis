@@ -1,5 +1,5 @@
-#define fill_data_cxx
-#include "fill_data.h"
+#define fill_data3_cxx
+#include "fill_data3.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -10,7 +10,7 @@
 #include "RooUnfoldBayes.h"
 #include "RooUnfoldTUnfold.h"
 
-void fill_data::Loop( const char* rur_file_name )
+void fill_data3::Loop( const char* rur_file_name )
 {
    if (fChain == 0) return;
 
@@ -89,6 +89,17 @@ void fill_data::Loop( const char* rur_file_name )
 
 
 
+   float good_range_log10_xmin = -2.5  ;
+   float good_range_log10_xmax = 0.0 ;
+
+   float good_range_log10_ymin = -2.0  ;
+   float good_range_log10_ymax = 0.0  ;
+
+   float good_range_log10_q2min = 2.3979400 ; // log10(250) = 2.3979400
+   float good_range_log10_q2max = 4 ;
+
+
+
 
    Long64_t nbytes = 0, nb = 0;
 
@@ -105,7 +116,6 @@ void fill_data::Loop( const char* rur_file_name )
          fflush(stdout) ;
       }
 
-      if ( dnn_Q2 < 240 ) continue ;
 
 
       if ( ei < 50 ) {
@@ -118,11 +128,93 @@ void fill_data::Loop( const char* rur_file_name )
            log10( obs_y_DA ), log10( obs_Q2_DA ) ) ;
       }
 
-      h_data_dnn -> Fill( log10( dnn_y ), log10( dnn_Q2 ) ) ;
-      h_data_e -> Fill( log10( obs_y_e ), log10( obs_Q2_e ) ) ;
-      h_data_esigma -> Fill( log10( obs_y_eSigma ), log10( obs_Q2_eSigma ) ) ;
-      h_data_isigma -> Fill( log10( obs_y_ISigma ), log10( obs_Q2_ISigma ) ) ;
-      h_data_da -> Fill( log10( obs_y_DA ), log10( obs_Q2_DA ) ) ;
+
+     //--- dnn
+
+      float log10_dnn_Q2 = log10(dnn_Q2) ;
+      float log10_dnn_x = log10(dnn_x) ;
+      float log10_dnn_y = log10(dnn_y) ;
+
+      if (     log10_dnn_Q2 >= good_range_log10_q2min && log10_dnn_Q2 <= good_range_log10_q2max
+            && log10_dnn_x  >= good_range_log10_xmin  && log10_dnn_x  <= good_range_log10_xmax
+            && log10_dnn_y  >= good_range_log10_ymin  && log10_dnn_y  <= good_range_log10_ymax   ) {
+
+         h_data_dnn -> Fill( log10_dnn_y, log10_dnn_Q2 ) ;
+
+      }
+
+
+
+     //--- e
+
+      float log10_e_Q2 = log10(obs_Q2_e) ;
+      float log10_e_x = log10(obs_x_e) ;
+      float log10_e_y = log10(obs_y_e) ;
+
+      if (     log10_e_Q2 >= good_range_log10_q2min && log10_e_Q2 <= good_range_log10_q2max
+            && log10_e_x  >= good_range_log10_xmin  && log10_e_x  <= good_range_log10_xmax
+            && log10_e_y  >= good_range_log10_ymin  && log10_e_y  <= good_range_log10_ymax   ) {
+
+         h_data_e -> Fill( log10_e_y, log10_e_Q2 ) ;
+
+      }
+
+
+
+     //--- esigma
+
+      float log10_esigma_Q2 = log10(obs_Q2_eSigma) ;
+      float log10_esigma_x = log10(obs_x_eSigma) ;
+      float log10_esigma_y = log10(obs_y_eSigma) ;
+
+
+      if (     log10_esigma_Q2 >= good_range_log10_q2min && log10_esigma_Q2 <= good_range_log10_q2max
+            && log10_esigma_x  >= good_range_log10_xmin  && log10_esigma_x  <= good_range_log10_xmax
+            && log10_esigma_y  >= good_range_log10_ymin  && log10_esigma_y  <= good_range_log10_ymax   ) {
+
+         h_data_esigma -> Fill( log10_esigma_y, log10_esigma_Q2 ) ;
+
+      }
+
+
+
+     //--- isigma
+
+      float log10_isigma_Q2 = log10(obs_Q2_ISigma) ;
+      float log10_isigma_x = log10(obs_x_ISigma) ;
+      float log10_isigma_y = log10(obs_y_ISigma) ;
+
+
+      if (     log10_isigma_Q2 >= good_range_log10_q2min && log10_isigma_Q2 <= good_range_log10_q2max
+            && log10_isigma_x  >= good_range_log10_xmin  && log10_isigma_x  <= good_range_log10_xmax
+            && log10_isigma_y  >= good_range_log10_ymin  && log10_isigma_y  <= good_range_log10_ymax   ) {
+
+         h_data_isigma -> Fill( log10_isigma_y, log10_isigma_Q2 ) ;
+
+      }
+
+
+
+     //--- da
+
+      float log10_da_Q2 = log10(obs_Q2_DA) ;
+      float log10_da_x = log10(obs_x_DA) ;
+      float log10_da_y = log10(obs_y_DA) ;
+
+
+      if (     log10_da_Q2 >= good_range_log10_q2min && log10_da_Q2 <= good_range_log10_q2max
+            && log10_da_x  >= good_range_log10_xmin  && log10_da_x  <= good_range_log10_xmax
+            && log10_da_y  >= good_range_log10_ymin  && log10_da_y  <= good_range_log10_ymax   ) {
+
+         h_data_da -> Fill( log10_da_y, log10_da_Q2 ) ;
+
+      }
+
+
+
+
+
+
 
 
    } // jentry

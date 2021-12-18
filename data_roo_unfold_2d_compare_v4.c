@@ -62,7 +62,12 @@ TH2F* trim_unused_bins( TH2F* hp, RooUnfoldResponse* rur ) {
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing bin with low entries  %9.4f.  global_bin %3d\n", i, j, x, y, entries, global_bin ) ;
                unused_global_bins.insert( global_bin ) ;
             }
-            if ( i == 1 || i == h_gen_source->GetNbinsX() || j == 1 || j == h_gen_source->GetNbinsX() ) {
+      ///   if ( i == 1 || i == h_gen_source->GetNbinsX() || j == 1 || j == h_gen_source->GetNbinsX() ) {
+      ///      int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+      ///      printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing edge bin.  global_bin %3d\n", i, j, x, y, global_bin ) ;
+      ///      unused_global_bins.insert( global_bin ) ;
+      ///   }
+            if ( j < 3 || j == h_gen_source->GetNbinsX() ) {
                int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing edge bin.  global_bin %3d\n", i, j, x, y, global_bin ) ;
                unused_global_bins.insert( global_bin ) ;
@@ -153,12 +158,12 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
 //-------
 
-   void data_roo_unfold_2d_compare_v3(
+   void data_roo_unfold_2d_compare_v4(
                      const char* method_a = "dnn",
                      const char* method_b = "esigma",
-                     const char* data_input_file = "fake-data-gen012_obs024-0.05-obs-good/fake-data-hists-seed-1-obs-good.root",
-                     const char* response_input_file = "rapgap-for-q2-vs-y-gen012_obs024-0.05-obs-good.root",
-                     const char* vary_vs_varx_string = "log10_q2_vs_log10_y",
+                     const char* data_input_file = "fake-data-max-stats-h1-binning.root",
+                     const char* response_input_file = "unfold-hists-h1-binning.root",
+                     const char* vary_vs_varx_string = "q2_vs_x",
                      int method_index = 2,
                      int n_iter = 1000  // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
                      ) {
@@ -724,7 +729,8 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
       can1 -> cd( ci++ ) ;
       hReco_a -> DrawCopy( "colz" ) ;
-      //gPad -> SetLogz(1) ;
+      gPad -> SetLogx(1) ;
+      gPad -> SetLogy(1) ;
 
       can1 -> cd( ci++ ) ;
       h_1d_unfolded_val_trimmed_a -> SetMaximum( 1.4 * h_1d_unfolded_val_trimmed_a -> GetMaximum() ) ;
@@ -754,7 +760,8 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
       can1 -> cd( ci++ ) ;
       hReco_b -> DrawCopy( "colz" ) ;
-      //gPad -> SetLogz(1) ;
+      gPad -> SetLogx(1) ;
+      gPad -> SetLogy(1) ;
 
       can1 -> cd( ci++ ) ;
       h_1d_unfolded_val_trimmed_b -> SetMaximum( 1.4 * h_1d_unfolded_val_trimmed_b -> GetMaximum() ) ;
@@ -886,21 +893,10 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
 
 
-      printf("\n\n\n") ;
-
-      printf("   Cut and paste for this:\n\n") ;
-
-      printf("     data_roo_unfold_2d_compare_v3(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%d)\n",
-          method_a, method_b, data_input_file, response_input_file, vary_vs_varx_string, method_index, n_iter ) ;
-
-      printf("\n\n\n") ;
-
-      unused_global_bins.clear() ;
 
 
 
-
-   //-----------
+// //-----------
 
 
       can4 -> cd() ;
@@ -970,6 +966,7 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
       can4 -> Update() ; can4 -> Draw() ;
 
+
     //---------------
 
 
@@ -1000,8 +997,8 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       gStyle->SetPaintTextFormat("5.3f") ;
       h_unfold_stat_err_ratio -> DrawCopy("text same") ;
 
-      //gPad -> SetLogx(1) ;
-      //gPad -> SetLogy(1) ;
+      gPad -> SetLogx(1) ;
+      gPad -> SetLogy(1) ;
 
       can5 -> Update() ; can5 -> Draw() ;
 
@@ -1013,6 +1010,17 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
 
     //---------------
+
+      printf("\n\n\n") ;
+
+      printf("   Cut and paste for this:\n\n") ;
+
+      printf("     data_roo_unfold_2d_compare_v4(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%d)\n",
+          method_a, method_b, data_input_file, response_input_file, vary_vs_varx_string, method_index, n_iter ) ;
+
+      printf("\n\n\n") ;
+
+      unused_global_bins.clear() ;
 
 
    }

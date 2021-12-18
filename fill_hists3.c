@@ -4,6 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
+#include "utils.c"
 #include "histio.c"
 
 //
@@ -290,6 +291,15 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
    h_x_gen_vs_obs_da     -> SetYTitle( "Gen x" ) ;
 
 
+   TH2F* h_h1_binning_q2_vs_x_gen_no_cuts = make_q2_vs_x_h1_binning( "h_h1_binning_q2_vs_x_gen_no_cuts" ) ;
+   h_h1_binning_q2_vs_x_gen_no_cuts -> SetXTitle( "Gen x" ) ;
+   h_h1_binning_q2_vs_x_gen_no_cuts -> SetYTitle( "Gen Q2" ) ;
+
+
+   TH2F* h_fine_h1_binning_q2_vs_x_obs_dnn = make_q2_vs_x_fine_h1_binning( "h_fine_h1_binning_q2_vs_x_obs_dnn" ) ;
+   h_fine_h1_binning_q2_vs_x_obs_dnn -> SetXTitle( "Obs x, DNN" ) ;
+   h_fine_h1_binning_q2_vs_x_obs_dnn -> SetYTitle( "Obs Q2, DNN" ) ;
+
 
    if ( last_event > 0 ) {
       nentries = last_event ;
@@ -322,6 +332,8 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
       float log10_gen_y = log10(from_tlv_gen_y) ;
 
 
+      h_h1_binning_q2_vs_x_gen_no_cuts -> Fill( from_tlv_gen_x, from_tlv_gen_Q2, wgt ) ;
+
       h_log10_q2_vs_log10_y_gen_no_cuts -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
 
 
@@ -348,6 +360,8 @@ void fill_hists3::Loop( int nbins_gen, int nbins_obs, bool verbose, int last_eve
          h_log10_q2_vs_log10_y_gen_dnn_sel -> Fill( log10_gen_y, log10_gen_Q2, wgt ) ;
 
          h_log10_q2_vs_log10_y_obs_dnn_sel -> Fill( log10_dnn_y, log10_dnn_Q2, wgt ) ;
+
+         h_fine_h1_binning_q2_vs_x_obs_dnn -> Fill( dnn_x, dnn_Q2, wgt ) ;
 
       }
 
