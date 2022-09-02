@@ -2,6 +2,9 @@
 #include "histio.c"
 #include "utils.c"
 #include "draw_2d_slices.c"
+#include "TExec.h"
+#include "TCanvas.h"
+#include "TH2F.h"
 
 #include "RooUnfoldResponse.h"
 #include "RooUnfoldBayes.h"
@@ -11,13 +14,15 @@
 //
 //  Before doing
 //
-//    .L data_roo_unfold_2d_compare_v3.c
+//    .L data_roo_unfold_2d_compare_v2.c
 //
 //  do
 //
 //   gSystem -> Load( "../RooUnfold/build/libRooUnfold.dylib" ) ;
 //
 //
+
+using namespace RooUnfolding ;
 
 //-------
 
@@ -33,7 +38,8 @@ void zero_unused_bins( TH1*  hp, RooUnfoldResponse* rur ) {
       double x = hp->GetXaxis()->GetBinCenter( i ) ;
       for ( int j=1; j<=hp->GetNbinsY(); j++ ) {
          double y = hp->GetYaxis()->GetBinCenter( j ) ;
-         int global_bin = rur->FindBin( hp, x, y ) ;
+         ///int global_bin = rur->FindBin( hp, x, y ) ;
+         int global_bin = findBin( hp, x, y ) ;
          if ( unused_global_bins.find( global_bin ) != unused_global_bins.end() ) {
              printf(" zero_unused_bins : zeroing bin  %2d, %2d  (%9.4f, %9.4f) :  content is %9.3f +/- %9.3f\n",
                 i, j, hp -> GetXaxis() -> GetBinCenter(i), hp -> GetYaxis() -> GetBinCenter(i),
@@ -58,17 +64,20 @@ TH2F* trim_unused_bins( TH2F* hp, RooUnfoldResponse* rur ) {
             double y = h_gen_source->GetYaxis()->GetBinCenter( j ) ;
             float entries = h_gen_source -> GetBinContent( i, j ) ;
             if ( entries < 1. ) {
-               int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               /////int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               int global_bin = findBin( (TH1*) h_gen_source, x, y ) ;
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing bin with low entries  %9.4f.  global_bin %3d\n", i, j, x, y, entries, global_bin ) ;
                unused_global_bins.insert( global_bin ) ;
             }
             if ( i == 1 || i == h_gen_source->GetNbinsX() || j == 1 || j == h_gen_source->GetNbinsX() ) {
-               int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               /////////int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               int global_bin = findBin( (TH1*) h_gen_source, x, y ) ;
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing edge bin.  global_bin %3d\n", i, j, x, y, global_bin ) ;
                unused_global_bins.insert( global_bin ) ;
             }
             if ( entries <= 0 ) {
-               int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               /////////int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               int global_bin = findBin( (TH1*) h_gen_source, x, y ) ;
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  global_bin %3d unused.\n", i, j, x, y, global_bin ) ;
                unused_global_bins.insert( global_bin ) ;
             }
@@ -123,7 +132,8 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
             double y = h_gen_source->GetYaxis()->GetBinCenter( j ) ;
             float entries = h_gen_source -> GetBinContent( i, j ) ;
             if ( entries <= 0 ) {
-               int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               /////////int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
+               int global_bin = findBin( (TH1*) h_gen_source, x, y ) ;
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  global_bin %3d unused.\n", i, j, x, y, global_bin ) ;
                unused_global_bins.insert( global_bin ) ;
             }
@@ -153,56 +163,28 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
 //-------
 
-   void data_roo_unfold_2d_compare_v3(
-                     const char* method_a = "dnn",
-                     const char* method_b = "esigma",
-                     const char* data_input_file = "fake-data-gen012_obs024-0.05-obs-good/fake-data-hists-seed-1-obs-good.root",
-                     const char* response_input_file = "rapgap-for-q2-vs-y-gen012_obs024-0.05-obs-good.root",
-                     const char* vary_vs_varx_string = "log10_q2_vs_log10_y",
-                     int method_index = 2,
-                     int n_iter = 1000  // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
-                     ) {
-
-      char rur_name_base[100] ;
-      sprintf( rur_name_base, "rur_2D_%s", vary_vs_varx_string ) ;
-
-      char h_data_name_base[100] ;
-      sprintf( h_data_name_base, "h_data_%s_obs", vary_vs_varx_string ) ;
-
-
-      char rur_name_a[100] ;
-      char rur_name_b[100] ;
-      sprintf( rur_name_a, "%s_%s", rur_name_base, method_a ) ;
-      sprintf( rur_name_b, "%s_%s", rur_name_base, method_b ) ;
-
-      char h_data_name_a[100] ;
-      char h_data_name_b[100] ;
-      sprintf( h_data_name_a, "%s_%s", h_data_name_base, method_a ) ;
-      sprintf( h_data_name_b, "%s_%s", h_data_name_base, method_b ) ;
-
-      char method_name_a[100] ;
-      char method_name_b[100] ;
-      sprintf( method_name_a, "%s", method_a ) ;
-      sprintf( method_name_b, "%s", method_b ) ;
+int main() {
+                     const char* rur_name_a    = "rur_2D_log10_q2_vs_log10_y_dnn" ;
+                     const char* h_data_name_a = "h_data_log10_q2_vs_log10_y_obs_dnn" ;
+                     const char* rur_name_b    = "rur_2D_log10_q2_vs_log10_y_esigma" ;
+                     const char* h_data_name_b = "h_data_log10_q2_vs_log10_y_obs_esigma" ;
+                     int method_index = 2 ;
+                     int n_iter = 1000 ;  // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
+                     const char* response_input_file = "rapgap-for-q2-vs-y-gen012_obs024-0.05-obs-good.root" ;
+                     ///////////const char* data_input_file = "fake-data-hists-seed-1-obs-good.root" ;
+                     const char* data_input_file = "fake-data-max-stats-sf5.0-nint.root" ;
+                     const char* method_name_a = "DNN" ;
+                     const char* method_name_b = "eSigma" ;
 
       gStyle -> SetPalette( kBird ) ;
-      gStyle -> SetPadLeftMargin(0.10) ;
       gStyle -> SetPadRightMargin(0.15) ;
 
       TCanvas* can1 = (TCanvas*) gDirectory -> FindObject( "can1" ) ;
       if ( can1 == 0x0 ) { can1 = new TCanvas( "can1", "", 50, 50, 1500, 1200 ) ; }
 
       TCanvas* can2 = (TCanvas*) gDirectory -> FindObject( "can2" ) ;
-      if ( can2 == 0x0 ) { can2 = new TCanvas( "can2", "No Acceptance Correction", 1550, 50, 800, 1200 ) ; }
+      if ( can2 == 0x0 ) { can2 = new TCanvas( "can2", "", 1550, 50, 800, 1200 ) ; }
 
-      TCanvas* can3 = (TCanvas*) gDirectory -> FindObject( "can3" ) ;
-      if ( can3 == 0x0 ) { can3 = new TCanvas( "can3", "With Acceptance Correction", 1650, 150, 800, 1200 ) ; }
-
-      TCanvas* can4 = (TCanvas*) gDirectory -> FindObject( "can4" ) ;
-      if ( can4 == 0x0 ) { can4 = new TCanvas( "can4", "With Acceptance Correction", 1750, 250, 800, 800 ) ; }
-
-      TCanvas* can5 = (TCanvas*) gDirectory -> FindObject( "can5" ) ;
-      if ( can5 == 0x0 ) { can5 = new TCanvas( "can5", "Unfolding stat err ratio, A/B", 1150, 350, 1400, 800 ) ; }
 
 
       gStyle -> SetOptStat(0) ;
@@ -220,72 +202,13 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       gDirectory -> cd( "Rint:/" ) ;
 
       char htitle[1000] ;
-      char hname[1000] ;
-
-
-
-
-
-     //--- things needed for acceptance correction
-
-      sprintf( hname, "h_%s_gen_no_cuts", vary_vs_varx_string ) ;
-      TH2F* h_2d_gen_no_cuts = (TH2F*) tf_response.Get( hname ) ;
-      if ( h_2d_gen_no_cuts == 0x0 ) { printf("\n\n *** can't find %s\n\n", hname ) ; return ; }
-
-
-      sprintf( hname, "h_%s_gen_%s_sel", vary_vs_varx_string, method_a ) ;
-      TH2F* h_2d_gen_a_sel = (TH2F*) tf_response.Get( hname ) ;
-      if ( h_2d_gen_a_sel == 0x0 ) { printf("\n\n *** can't find %s\n\n", hname ) ; return ; }
-
-
-      sprintf( hname, "h_%s_gen_%s_sel", vary_vs_varx_string, method_b ) ;
-      TH2F* h_2d_gen_b_sel = (TH2F*) tf_response.Get( hname ) ;
-      if ( h_2d_gen_b_sel == 0x0 ) { printf("\n\n *** can't find %s\n\n", hname ) ; return ; }
-
-
-      sprintf( hname, "h_%s_gen_acceptance_correction_%s", vary_vs_varx_string, method_a ) ;
-      TH2F* h_2d_gen_acceptance_correction_a = (TH2F*) h_2d_gen_no_cuts -> Clone( hname ) ;
-      h_2d_gen_acceptance_correction_a -> Reset() ;
-      sprintf( htitle, "Acceptance correction, %s", method_a ) ;
-      h_2d_gen_acceptance_correction_a -> SetTitle( htitle ) ;
-
-
-      sprintf( hname, "h_%s_gen_acceptance_correction_%s", vary_vs_varx_string, method_b ) ;
-      TH2F* h_2d_gen_acceptance_correction_b = (TH2F*) h_2d_gen_no_cuts -> Clone( hname ) ;
-      h_2d_gen_acceptance_correction_b -> Reset() ;
-      sprintf( htitle, "Acceptance correction, %s", method_b ) ;
-      h_2d_gen_acceptance_correction_b -> SetTitle( htitle ) ;
-
-
-      for ( int xbi = 1; xbi <= h_2d_gen_no_cuts -> GetNbinsX(); xbi ++ ) {
-         for ( int ybi = 1; ybi <= h_2d_gen_no_cuts -> GetNbinsY(); ybi ++ ) {
-            float val_no_cuts = h_2d_gen_no_cuts -> GetBinContent( xbi, ybi ) ;
-            float val_a_sel   = h_2d_gen_a_sel -> GetBinContent( xbi, ybi ) ;
-            float val_b_sel   = h_2d_gen_b_sel -> GetBinContent( xbi, ybi ) ;
-            float ac_a = 1. ;
-            float ac_b = 1. ;
-            if ( val_a_sel > 0 ) ac_a = val_no_cuts / val_a_sel ;
-            if ( val_b_sel > 0 ) ac_b = val_no_cuts / val_b_sel ;
-            h_2d_gen_acceptance_correction_a -> SetBinContent( xbi, ybi, ac_a ) ;
-            h_2d_gen_acceptance_correction_b -> SetBinContent( xbi, ybi, ac_b ) ;
-            h_2d_gen_acceptance_correction_a -> SetBinError( xbi, ybi, 0. ) ;
-            h_2d_gen_acceptance_correction_b -> SetBinError( xbi, ybi, 0. ) ;
-         } // ybi
-      } // xbi
-
-
-
-
-
-
-
 
 
       RooUnfoldResponse* rur_a = (RooUnfoldResponse*) tf_response.Get( rur_name_a ) ;
-      if ( rur_a == 0x0 ) { printf("\n\n *** can't find %s\n\n", rur_name_a ) ; return ; }
+      if ( rur_a == 0x0 ) { printf("\n\n *** can't find %s\n\n", rur_name_a ) ; return -1 ; }
 
       RooUnfoldResponse* rur_b = (RooUnfoldResponse*) tf_response.Get( rur_name_b ) ;
-      if ( rur_b == 0x0 ) { printf("\n\n *** can't find %s\n\n", rur_name_b ) ; return ; }
+      if ( rur_b == 0x0 ) { printf("\n\n *** can't find %s\n\n", rur_name_b ) ; return -1 ; }
 
 
 
@@ -297,9 +220,10 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       TH1* h_gen_source_a = rur_a -> Htruth() ;
 
       TH1* h_obs_data_a = (TH1*) tf_data.Get( h_data_name_a ) ;
-      if ( h_obs_data_a == 0x0 ) { printf("\n\n *** can't find %s\n\n", h_data_name_a ) ; return ; }
+      if ( h_obs_data_a == 0x0 ) { printf("\n\n *** can't find %s\n\n", h_data_name_a ) ; return -1 ; }
 
       sprintf( htitle, "Response matrix for log10 Q2 vs log10 x, %s", method_name_a ) ;
+      h_in_gen_vs_obs_a -> SetName( "h_in_gen_vs_obs_a" ) ;
       h_in_gen_vs_obs_a -> SetTitle( htitle ) ;
       h_in_gen_vs_obs_a -> SetXTitle( "Reconstructed bin number" ) ;
       h_in_gen_vs_obs_a -> SetYTitle( "Gen bin number" ) ;
@@ -313,9 +237,10 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       TH1* h_gen_source_b = rur_b -> Htruth() ;
 
       TH1* h_obs_data_b = (TH1*) tf_data.Get( h_data_name_b ) ;
-      if ( h_obs_data_b == 0x0 ) { printf("\n\n *** can't find %s\n\n", h_data_name_b ) ; return ; }
+      if ( h_obs_data_b == 0x0 ) { printf("\n\n *** can't find %s\n\n", h_data_name_b ) ; return -1 ; }
 
       sprintf( htitle, "Response matrix for log10 Q2 vs log10 x, %s", method_name_b ) ;
+      h_in_gen_vs_obs_b -> SetName( "h_in_gen_vs_obs_b" ) ;
       h_in_gen_vs_obs_b -> SetTitle( htitle ) ;
       h_in_gen_vs_obs_b -> SetXTitle( "Reconstructed bin number" ) ;
       h_in_gen_vs_obs_b -> SetYTitle( "Gen bin number" ) ;
@@ -340,41 +265,29 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
          unfold_b = new RooUnfoldTUnfold( rur_b, h_obs_data_b ) ;
       } else {
          printf("\n\n *** I don't know method_index = %d\n\n", method_index ) ;
-         return ;
+         return -1 ;
       }
 
 
-      //////////TH1* hReco_a = (TH1*) unfold_a -> Hreco(RooUnfold::kCovariance) ;
-      //////////TH1* hReco_b = (TH1*) unfold_b -> Hreco(RooUnfold::kCovariance) ;
+      //////////////TH1* hReco_a = (TH1*) unfold_a -> Hreco(RooUnfold::kCovariance) ;
+      //////////////TH1* hReco_b = (TH1*) unfold_b -> Hreco(RooUnfold::kCovariance) ;
 
       TH1* hReco_a = (TH1*) unfold_a -> Hunfold() ;
       TH1* hReco_b = (TH1*) unfold_b -> Hunfold() ;
 
-
-      TH1* hReco_ac_a = (TH1*) hReco_a -> Clone( "hReco_ac_a" ) ;
-      TH1* hReco_ac_b = (TH1*) hReco_b -> Clone( "hReco_ac_b" ) ;
-
-      hReco_ac_a -> Multiply( h_2d_gen_acceptance_correction_a ) ;
-      hReco_ac_b -> Multiply( h_2d_gen_acceptance_correction_b ) ;
-
       sprintf( htitle, "Unfolded, log10 Q2 vs log10 y, %s", method_name_a ) ;
+      hReco_a -> SetName( "hReco_a" ) ;
       hReco_a -> SetTitle( htitle ) ;
       hReco_a -> SetXTitle( "Unfolded log10 y" ) ;
       hReco_a -> SetYTitle( "Unfolded log10 Q2" ) ;
 
-      hReco_ac_a -> SetTitle( htitle ) ;
-      hReco_ac_a -> SetXTitle( "Unfolded log10 y" ) ;
-      hReco_ac_a -> SetYTitle( "Unfolded log10 Q2" ) ;
-
 
       sprintf( htitle, "Unfolded, log10 Q2 vs log10 y, %s", method_name_b ) ;
+      hReco_b -> SetName( "hReco_b" ) ;
       hReco_b -> SetTitle( htitle ) ;
       hReco_b -> SetXTitle( "Unfolded log10 y" ) ;
       hReco_b -> SetYTitle( "Unfolded log10 Q2" ) ;
 
-      hReco_ac_b -> SetTitle( htitle ) ;
-      hReco_ac_b -> SetXTitle( "Unfolded log10 y" ) ;
-      hReco_ac_b -> SetYTitle( "Unfolded log10 Q2" ) ;
 
 
 
@@ -382,20 +295,21 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
    ///unfold_a -> PrintTable( cout ) ;
    ///printf("\n\n") ;
 
-      TMatrixD unfolding_cov_mat_a = unfold_a -> Ereco() ;
+      ///////////TMatrixD unfolding_cov_mat_a = unfold_a -> Ereco() ;
+      TMatrixD unfolding_cov_mat_a = unfold_a -> Eunfold() ;
 
-      TMatrixD unfolding_inverse_cov_mat_a = unfold_a -> Wreco() ;
+      ///////////TMatrixD unfolding_inverse_cov_mat_a = unfold_a -> Wreco() ;
+      TMatrixD unfolding_inverse_cov_mat_a = unfold_a -> Wunfold() ;
 
-      TVectorD unfolding_err_a = unfold_a -> ErecoV( RooUnfold::kCovariance ) ;
+      ///////////TVectorD unfolding_err_a = unfold_a -> ErecoV( RooUnfold::kCovariance ) ;
+      TVectorD unfolding_err_a = unfold_a -> EunfoldV( RooUnfold::kCovariance ) ;
 
-      TVectorD unfolding_val_a = unfold_a -> Vreco() ;
+      ///////////TVectorD unfolding_val_a = unfold_a -> Vreco() ;
+      TVectorD unfolding_val_a = unfold_a -> Vunfold() ;
 
       TVectorD gen_val_a( unfolding_val_a.GetNrows() ) ;
 
-      TVectorD acceptance_correction_val_a( unfolding_val_a.GetNrows() ) ;
-      TVectorD unfolding_ac_val_a( unfolding_val_a.GetNrows() ) ;
-      TVectorD unfolding_ac_err_a( unfolding_val_a.GetNrows() ) ;
-      TVectorD gen_ac_val_a( unfolding_val_a.GetNrows() ) ;
+
 
 
 
@@ -403,20 +317,19 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
    ///unfold_b -> PrintTable( cout ) ;
    ///printf("\n\n") ;
 
-      TMatrixD unfolding_cov_mat_b = unfold_b -> Ereco() ;
+      ////////////TMatrixD unfolding_cov_mat_b = unfold_b -> Ereco() ;
+      TMatrixD unfolding_cov_mat_b = unfold_b -> Eunfold() ;
 
-      TMatrixD unfolding_inverse_cov_mat_b = unfold_b -> Wreco() ;
+      ////////////TMatrixD unfolding_inverse_cov_mat_b = unfold_b -> Wreco() ;
+      TMatrixD unfolding_inverse_cov_mat_b = unfold_b -> Wunfold() ;
 
-      TVectorD unfolding_err_b = unfold_b -> ErecoV( RooUnfold::kCovariance ) ;
+      ////////////TVectorD unfolding_err_b = unfold_b -> ErecoV( RooUnfold::kCovariance ) ;
+      TVectorD unfolding_err_b = unfold_b -> EunfoldV( RooUnfold::kCovariance ) ;
 
-      TVectorD unfolding_val_b = unfold_b -> Vreco() ;
+      ////////////TVectorD unfolding_val_b = unfold_b -> Vreco() ;
+      TVectorD unfolding_val_b = unfold_b -> Vunfold() ;
 
       TVectorD gen_val_b( unfolding_val_b.GetNrows() ) ;
-
-      TVectorD acceptance_correction_val_b( unfolding_val_b.GetNrows() ) ;
-      TVectorD unfolding_ac_val_b( unfolding_val_b.GetNrows() ) ;
-      TVectorD unfolding_ac_err_b( unfolding_val_b.GetNrows() ) ;
-      TVectorD gen_ac_val_b( unfolding_val_b.GetNrows() ) ;
 
 
 
@@ -539,14 +452,6 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
             for ( int xbi = 1; xbi <= h_gen_compare_a -> GetNbinsX(); xbi++ ) {
                gen_val_a[vi] = h_gen_compare_a -> GetBinContent( xbi, ybi ) ;
                gen_val_b[vi] = h_gen_compare_b -> GetBinContent( xbi, ybi ) ;
-               acceptance_correction_val_a[vi] = h_2d_gen_acceptance_correction_a -> GetBinContent( xbi, ybi ) ;
-               acceptance_correction_val_b[vi] = h_2d_gen_acceptance_correction_b -> GetBinContent( xbi, ybi ) ;
-               unfolding_ac_val_a[vi] = unfolding_val_a[vi] * acceptance_correction_val_a[vi] ;
-               unfolding_ac_val_b[vi] = unfolding_val_b[vi] * acceptance_correction_val_b[vi] ;
-               unfolding_ac_err_a[vi] = unfolding_err_a[vi] * acceptance_correction_val_a[vi] ;
-               unfolding_ac_err_b[vi] = unfolding_err_b[vi] * acceptance_correction_val_b[vi] ;
-               gen_ac_val_a[vi] = gen_val_a[vi] * acceptance_correction_val_a[vi] ;
-               gen_ac_val_b[vi] = gen_val_b[vi] * acceptance_correction_val_b[vi] ;
                vi ++ ;
             } // xbi
          } // ybi
@@ -582,15 +487,11 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       sprintf( htitle, "1D view: unfolded  %s", method_name_a ) ;
       TH1F* h_1d_unfolded_val_a = new TH1F( "h_1d_unfolded_val_a", htitle, unfolding_val_a.GetNrows(), -0.5, unfolding_val_a.GetNrows()-0.5 ) ;
       TH1F* h_1d_gen_val_a = new TH1F( "h_1d_gen_val_a", "1D view: gen", unfolding_val_a.GetNrows(), -0.5, unfolding_val_a.GetNrows()-0.5 ) ;
-      TH1F* h_1d_unfolded_ac_val_a = new TH1F( "h_1d_unfolded_ac_val_a", htitle, unfolding_ac_val_a.GetNrows(), -0.5, unfolding_ac_val_a.GetNrows()-0.5 ) ;
-      TH1F* h_1d_gen_ac_val_a = new TH1F( "h_1d_gen_ac_val_a", "1D view: gen", unfolding_ac_val_a.GetNrows(), -0.5, unfolding_ac_val_a.GetNrows()-0.5 ) ;
 
 
       sprintf( htitle, "1D view: unfolded  %s", method_name_b ) ;
       TH1F* h_1d_unfolded_val_b = new TH1F( "h_1d_unfolded_val_b", htitle, unfolding_val_b.GetNrows(), -0.5, unfolding_val_b.GetNrows()-0.5 ) ;
       TH1F* h_1d_gen_val_b = new TH1F( "h_1d_gen_val_b", "1D view: gen", unfolding_val_b.GetNrows(), -0.5, unfolding_val_b.GetNrows()-0.5 ) ;
-      TH1F* h_1d_unfolded_ac_val_b = new TH1F( "h_1d_unfolded_ac_val_b", htitle, unfolding_ac_val_b.GetNrows(), -0.5, unfolding_ac_val_b.GetNrows()-0.5 ) ;
-      TH1F* h_1d_gen_ac_val_b = new TH1F( "h_1d_gen_ac_val_b", "1D view: gen", unfolding_ac_val_b.GetNrows(), -0.5, unfolding_ac_val_b.GetNrows()-0.5 ) ;
 
 
 
@@ -605,14 +506,6 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
          h_1d_unfolded_val_b -> SetBinError( i+1, unfolding_err_b[i] ) ;
          h_1d_gen_val_b -> SetBinContent( i+1, gen_val_b[i] ) ;
 
-         h_1d_unfolded_ac_val_a -> SetBinContent( i+1, unfolding_ac_val_a[i] ) ;
-         h_1d_unfolded_ac_val_a -> SetBinError( i+1, unfolding_ac_err_a[i] ) ;
-         h_1d_gen_ac_val_a -> SetBinContent( i+1, gen_ac_val_a[i] ) ;
-
-         h_1d_unfolded_ac_val_b -> SetBinContent( i+1, unfolding_ac_val_b[i] ) ;
-         h_1d_unfolded_ac_val_b -> SetBinError( i+1, unfolding_ac_err_b[i] ) ;
-         h_1d_gen_ac_val_b -> SetBinContent( i+1, gen_ac_val_b[i] ) ;
-
       }
 
 
@@ -622,38 +515,55 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
 
 
       TH2F* h_unfold_cov_mat_trimmed_a = trim_unused_bins( h_unfold_cov_mat_a, rur_a ) ;
+      h_unfold_cov_mat_trimmed_a -> SetName( "h_unfold_cov_mat_trimmed_a" ) ;
+
       TH2F* h_unfold_cor_mat_trimmed_a = trim_unused_bins( h_unfold_cor_mat_a, rur_a ) ;
+      h_unfold_cor_mat_trimmed_a -> SetName( "h_unfold_cor_mat_trimmed_a" ) ;
+
       TH1F* h_global_correlation_coeff_trimmed_a = trim_unused_bins( h_global_correlation_coeff_a, rur_a ) ;
+      h_global_correlation_coeff_trimmed_a -> SetName( "h_global_correlation_coeff_trimmed_a" ) ;
+
       TH1F* h_unfolding_result_err_trimmed_a = trim_unused_bins( h_unfolding_result_err_a, rur_a ) ;
+      h_unfolding_result_err_trimmed_a -> SetName( "h_unfolding_result_err_trimmed_a" ) ;
+
       TH1F* h_1d_unfolded_val_trimmed_a = trim_unused_bins( h_1d_unfolded_val_a, rur_a ) ;
+      h_1d_unfolded_val_trimmed_a -> SetName( "h_1d_unfolded_val_trimmed_a" ) ;
+
       TH1F* h_1d_gen_val_trimmed_a = trim_unused_bins( h_1d_gen_val_a, rur_a ) ;
+      h_1d_gen_val_trimmed_a -> SetName( "h_1d_gen_val_trimmed_a" ) ;
+
+
+
+
+
       h_1d_gen_val_trimmed_a -> Scale( ( h_1d_unfolded_val_trimmed_a -> Integral() ) / ( h_1d_gen_val_trimmed_a -> Integral() ) ) ;
 
-      TH1F* h_1d_unfolded_ac_val_trimmed_a = trim_unused_bins( h_1d_unfolded_ac_val_a, rur_a ) ;
-      TH1F* h_1d_gen_ac_val_trimmed_a = trim_unused_bins( h_1d_gen_ac_val_a, rur_a ) ;
-      h_1d_gen_ac_val_trimmed_a -> Scale( ( h_1d_unfolded_ac_val_trimmed_a -> Integral() ) / ( h_1d_gen_ac_val_trimmed_a -> Integral() ) ) ;
-
-
-
-
       TH2F* h_unfold_cov_mat_trimmed_b = trim_unused_bins( h_unfold_cov_mat_b, rur_b ) ;
-      TH2F* h_unfold_cor_mat_trimmed_b = trim_unused_bins( h_unfold_cor_mat_b, rur_b ) ;
-      TH1F* h_global_correlation_coeff_trimmed_b = trim_unused_bins( h_global_correlation_coeff_b, rur_b ) ;
-      TH1F* h_unfolding_result_err_trimmed_b = trim_unused_bins( h_unfolding_result_err_b, rur_b ) ;
-      TH1F* h_1d_unfolded_val_trimmed_b = trim_unused_bins( h_1d_unfolded_val_b, rur_b ) ;
-      TH1F* h_1d_gen_val_trimmed_b = trim_unused_bins( h_1d_gen_val_b, rur_b ) ;
-      h_1d_gen_val_trimmed_b -> Scale( ( h_1d_unfolded_val_trimmed_b -> Integral() ) / ( h_1d_gen_val_trimmed_b -> Integral() ) ) ;
+      h_unfold_cov_mat_trimmed_b -> SetName( "h_unfold_cov_mat_trimmed_b" ) ;
 
-      TH1F* h_1d_unfolded_ac_val_trimmed_b = trim_unused_bins( h_1d_unfolded_ac_val_b, rur_b ) ;
-      TH1F* h_1d_gen_ac_val_trimmed_b = trim_unused_bins( h_1d_gen_ac_val_b, rur_b ) ;
-      h_1d_gen_ac_val_trimmed_b -> Scale( ( h_1d_unfolded_ac_val_trimmed_b -> Integral() ) / ( h_1d_gen_ac_val_trimmed_b -> Integral() ) ) ;
+      TH2F* h_unfold_cor_mat_trimmed_b = trim_unused_bins( h_unfold_cor_mat_b, rur_b ) ;
+      h_unfold_cor_mat_trimmed_b -> SetName( "h_unfold_cor_mat_trimmed_b" ) ;
+
+      TH1F* h_global_correlation_coeff_trimmed_b = trim_unused_bins( h_global_correlation_coeff_b, rur_b ) ;
+      h_global_correlation_coeff_trimmed_b -> SetName( "h_global_correlation_coeff_trimmed_b" ) ;
+
+      TH1F* h_unfolding_result_err_trimmed_b = trim_unused_bins( h_unfolding_result_err_b, rur_b ) ;
+      h_unfolding_result_err_trimmed_b -> SetName( "h_unfolding_result_err_trimmed_b" ) ;
+
+      TH1F* h_1d_unfolded_val_trimmed_b = trim_unused_bins( h_1d_unfolded_val_b, rur_b ) ;
+      h_1d_unfolded_val_trimmed_b -> SetName( "h_1d_unfolded_val_trimmed_b" ) ;
+
+      TH1F* h_1d_gen_val_trimmed_b = trim_unused_bins( h_1d_gen_val_b, rur_b ) ;
+      h_1d_gen_val_trimmed_b -> SetName( "h_1d_gen_val_trimmed_b" ) ;
+
+
+
+
+      h_1d_gen_val_trimmed_b -> Scale( ( h_1d_unfolded_val_trimmed_b -> Integral() ) / ( h_1d_gen_val_trimmed_b -> Integral() ) ) ;
 
 
       h_1d_unfolded_val_trimmed_a -> SetXTitle( "Global unfolded bin number") ;
       h_1d_unfolded_val_trimmed_b -> SetXTitle( "Global unfolded bin number") ;
-
-      h_1d_unfolded_ac_val_trimmed_a -> SetXTitle( "Global unfolded bin number") ;
-      h_1d_unfolded_ac_val_trimmed_b -> SetXTitle( "Global unfolded bin number") ;
 
       h_unfold_cov_mat_trimmed_a -> SetXTitle( "Global unfolded bin number") ;
       h_unfold_cov_mat_trimmed_a -> SetYTitle( "Global unfolded bin number") ;
@@ -698,15 +608,6 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       printf("\n\n Zeroing unused bins for b:\n") ;
       zero_unused_bins( hReco_b, rur_b ) ;
       printf("\n\n") ;
-
-
-
-
-
-
-
-
-
 
 
       int ci ;
@@ -818,11 +719,7 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       can1 -> Draw() ;
       gSystem -> ProcessEvents() ;
 
-
-
-
-
-
+      can1 -> SaveAs("mt3-can1.pdf") ;
 
 
    //-----------
@@ -858,165 +755,53 @@ TH1F* trim_unused_bins( TH1F* hp, RooUnfoldResponse* rur ) {
       draw_2d_slices( hReco_b, 1, htitle_b ) ;
 
 
-   //-----------
-
-      gStyle -> SetPadRightMargin(0.10) ;
-      gStyle -> SetPadLeftMargin(0.15) ;
-
-
-      can3 -> cd() ;
-      can3 -> Clear() ;
-      can3 -> Divide(2,2) ;
-
-      sprintf( htitle_a, "Unfolded, %s", method_name_a ) ;
-      sprintf( htitle_b, "Unfolded, %s", method_name_b ) ;
-
-      ci = 1 ;
-
-      can3 -> cd( ci++ ) ;
-      draw_2d_slices( hReco_ac_a, 0, htitle_a ) ;
-
-      can3 -> cd( ci++ ) ;
-      draw_2d_slices( hReco_ac_b, 0, htitle_b ) ;
-
-
-
-      can3 -> cd( ci++ ) ;
-      draw_2d_slices( hReco_ac_a, 1, htitle_a ) ;
-
-      can3 -> cd( ci++ ) ;
-      draw_2d_slices( hReco_ac_b, 1, htitle_b ) ;
-
-
+      can2 -> SaveAs("mt3-can2.pdf") ;
 
       printf("\n\n\n") ;
 
       printf("   Cut and paste for this:\n\n") ;
 
-      printf("     data_roo_unfold_2d_compare_v3(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",%d,%d)\n",
-          method_a, method_b, data_input_file, response_input_file, vary_vs_varx_string, method_index, n_iter ) ;
+      printf("     data_roo_unfold_2d_compare_v2(\"%s\",\"%s\",\"%s\",\"%s\",%d,%d,\"%s\",\"%s\",\"%s\",\"%s\")\n",
+         rur_name_a, h_data_name_a, rur_name_b, h_data_name_b,
+         method_index, n_iter, response_input_file, data_input_file, method_name_a, method_name_b ) ;
 
       printf("\n\n\n") ;
 
+
+    //------- Save outputs
+
+      TFile* tf_out = new TFile( "mt3-output.root", "RECREATE" ) ;
+
+      h_in_gen_vs_obs_a -> Write() ;
+      hReco_a -> Write() ;
+      h_1d_gen_val_trimmed_a -> Write() ;
+      h_unfold_cor_mat_trimmed_a -> Write() ;
+
+      h_in_gen_vs_obs_b -> Write() ;
+      hReco_b -> Write() ;
+      h_1d_gen_val_trimmed_b -> Write() ;
+      h_1d_unfolded_val_trimmed_b -> Write() ;
+
+      h_global_correlation_coeff_trimmed_a -> Write() ;
+      h_global_correlation_coeff_trimmed_b -> Write() ;
+      h_unfolding_result_err_trimmed_a -> Write() ;
+      h_unfolding_result_err_trimmed_b -> Write() ;
+
+      h_unfolding_result_error_ratio -> Write() ;
+
+      h_1d_unfolded_val_trimmed_b_copy -> Write() ;
+      h_1d_unfolded_val_trimmed_a -> Write() ;
+
+
+      h_unfold_cor_mat_trimmed_b -> Write() ;
+
+
+
+
+
       unused_global_bins.clear() ;
 
-
-
-
-   //-----------
-
-
-      can4 -> cd() ;
-      can4 -> Clear() ;
-      can4 -> Divide(2,2) ;
-
-      TH1F* h_1d_unfolded_over_gen_closure_a = (TH1F*) h_1d_unfolded_val_trimmed_a -> Clone( "h_1d_unfolded_over_gen_closure_a" ) ;
-      sprintf( htitle, "Unfolded / gen, %s", method_a ) ;
-      h_1d_unfolded_over_gen_closure_a -> SetTitle( htitle ) ;
-      h_1d_unfolded_over_gen_closure_a -> Divide( h_1d_gen_val_trimmed_a ) ;
-
-      h_1d_unfolded_over_gen_closure_a -> SetMaximum(1.2) ;
-      h_1d_unfolded_over_gen_closure_a -> SetMinimum(0.8) ;
-
-
-      TH1F* h_1d_unfolded_over_gen_closure_b = (TH1F*) h_1d_unfolded_val_trimmed_b -> Clone( "h_1d_unfolded_over_gen_closure_b" ) ;
-      sprintf( htitle, "Unfolded / gen, %s", method_b ) ;
-      h_1d_unfolded_over_gen_closure_b -> SetTitle( htitle ) ;
-      h_1d_unfolded_over_gen_closure_b -> Divide( h_1d_gen_val_trimmed_b ) ;
-
-      h_1d_unfolded_over_gen_closure_b -> SetMaximum(1.2) ;
-      h_1d_unfolded_over_gen_closure_b -> SetMinimum(0.8) ;
-
-      gStyle -> SetOptStat("emrou") ;
-
-      sprintf( htitle, "Point pulls, %s", method_a ) ;
-      TH1F* h_point_pulls_a = new TH1F( "h_point_pulls_a", htitle, 20, -5., 5. ) ;
-      h_point_pulls_a -> SetFillColor(30) ;
-
-      sprintf( htitle, "Point pulls, %s", method_b ) ;
-      TH1F* h_point_pulls_b = new TH1F( "h_point_pulls_b", htitle, 20, -5., 5. ) ;
-      h_point_pulls_b -> SetFillColor(30) ;
-
-      for ( int bi=1; bi < h_1d_unfolded_over_gen_closure_a->GetNbinsX(); bi++ ) {
-         float val = 0. ;
-         float err = 1. ;
-         float pull ;
-         val = h_1d_unfolded_over_gen_closure_a -> GetBinContent( bi ) ;
-         err = h_1d_unfolded_over_gen_closure_a -> GetBinError( bi ) ;
-         if ( err > 0 ) pull = (val-1.) / err ;
-         h_point_pulls_a -> Fill( pull ) ;
-         val = h_1d_unfolded_over_gen_closure_b -> GetBinContent( bi ) ;
-         err = h_1d_unfolded_over_gen_closure_b -> GetBinError( bi ) ;
-         if ( err > 0 ) pull = (val-1.) / err ;
-         h_point_pulls_b -> Fill( pull ) ;
-      } // bi
-
-
-      ci = 1 ;
-
-
-      can4 -> cd( ci++ ) ;
-      h_1d_unfolded_over_gen_closure_a -> Draw( "e0" ) ;
-      gPad -> SetGridy(1) ;
-
-
-      can4 -> cd( ci++ ) ;
-      h_1d_unfolded_over_gen_closure_b -> Draw( "e0" ) ;
-      gPad -> SetGridy(1) ;
-
-
-      can4 -> cd( ci++ ) ;
-      h_point_pulls_a -> Draw() ;
-
-      can4 -> cd( ci++ ) ;
-      h_point_pulls_b -> Draw() ;
-
-      can4 -> Update() ; can4 -> Draw() ;
-
-    //---------------
-
-
-      can5 -> cd() ;
-      can5 -> Clear() ;
-
-
-      TH1* h_unfold_stat_err_ratio = (TH1*) hReco_a -> Clone( "h_unfold_stat_err_ratio" ) ;
-      sprintf( htitle, "Unfolding stat error ratio, %s / %s", method_a, method_b ) ;
-      h_unfold_stat_err_ratio -> SetTitle( htitle ) ;
-
-      for ( int ci=1; ci <= hReco_a -> GetNcells(); ci++ ) {
-         float err_a = hReco_a -> GetBinError( ci ) ;
-         float err_b = hReco_b -> GetBinError( ci ) ;
-         float err_ratio = 0. ;
-         if ( err_b > 0 && err_a > 0 ) err_ratio = err_a / err_b ;
-         h_unfold_stat_err_ratio -> SetBinContent( ci, err_ratio ) ;
-      } // ci
-
-      gStyle -> SetOptStat(0) ;
-
-      h_unfold_stat_err_ratio -> SetMaximum(1.) ;
-
-      h_unfold_stat_err_ratio -> DrawCopy("colz") ;
-      change_hist_palette -> Draw() ;
-      h_unfold_stat_err_ratio -> DrawCopy("colz same") ;
-
-      gStyle->SetPaintTextFormat("5.3f") ;
-      h_unfold_stat_err_ratio -> DrawCopy("text same") ;
-
-      //gPad -> SetLogx(1) ;
-      //gPad -> SetLogy(1) ;
-
-      can5 -> Update() ; can5 -> Draw() ;
-
-
-
-
-
-
-
-
-    //---------------
-
+      return 0 ;
 
    }
 

@@ -1,6 +1,6 @@
 
 
-   void draw_2d_slices( TH1* hp, bool do_logy = false, const char* htitle = "" ) {
+   void draw_2d_slices( TH1* hp, bool do_logy = false, const char* htitle = "", bool do_logx = false ) {
 
       printf("\n\n At beginning of draw_2d_slices for %s.\n\n", hp->GetName() ) ; fflush(stdout) ;
 
@@ -65,6 +65,7 @@
             h1dslice -> DrawCopy("same") ;
             h1dslice -> DrawCopy("hist l same") ;
          }
+         if ( do_logx ) { gPad -> SetLogx(1) ; }
 
 ///      char label[100] ;
 ///      float bin_log10q2min = hp -> GetYaxis() -> GetBinLowEdge( ybi ) ;

@@ -1,5 +1,15 @@
 #ifndef utils_c
 #define utils_c
+#include "TCanvas.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TH2Poly.h"
+#include "TGraph.h"
+#include "TPad.h"
+#include "TColor.h"
+#include "TStyle.h"
+#include "TLegend.h"
+
 
 
    TCanvas* get_canvas( const char* cname, const char* ctitle = "",
