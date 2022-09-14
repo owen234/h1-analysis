@@ -48,3 +48,7 @@ add_executable(mytest3_uniform_binning mytest3_uniform_binning.cxx)
 target_link_libraries(mytest3_uniform_binning PUBLIC  ${ROOT_LIBRARIES} ${ROOT_EXE_LINKER_FLAGS} RooUnfold)
 
 
+add_executable(run_unfolding1 run_unfolding1.cxx)
+target_link_libraries(run_unfolding1 PUBLIC  ${ROOT_LIBRARIES} ${ROOT_EXE_LINKER_FLAGS} RooUnfold)
+
+

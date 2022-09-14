@@ -1,0 +1,55 @@
+
+#include "histio.c"
+#include "calc_reduced_xsec_from_q2_vs_x.c"
+#include "fill_h1_rxsec_th2.c"
+#include "utils.c"
+
+TH2F* rxsec_from_fake_data_no_unfolding_with_acceptance() {
+
+   gStyle -> SetOptStat(0) ;
+
+   ///////////gDirectory -> Delete() ;
+
+   loadHist("unfold-hists-h1-binning.root") ;
+
+   TH2F* h_q2_vs_x_gen_no_cuts = (TH2F*) get_hist2d( "h_q2_vs_x_gen_no_cuts" ) ;
+   TH2F* h_q2_vs_x_gen_dnn_sel = (TH2F*) get_hist2d( "h_q2_vs_x_gen_dnn_sel" ) ;
+
+  //--- keep value set to no_cuts value (i.e. post acceptance correction) but use stat
+  //     errors from selected number of events (dnn_sel), scaled by acceptance correction.
+
+   TH2F* hp = h_q2_vs_x_gen_no_cuts ;
+
+   for ( int q2bi=1; q2bi <= hp -> GetNbinsY(); q2bi ++ ) {
+      for ( int xbi=1; xbi <= hp -> GetNbinsX(); xbi ++ ) {
+         float val_nc  = h_q2_vs_x_gen_no_cuts -> GetBinContent( xbi, q2bi ) ;
+         float val_sel = h_q2_vs_x_gen_dnn_sel -> GetBinContent( xbi, q2bi ) ;
+         float new_err = 0. ;
+         if ( val_sel > 0 ) new_err = sqrt(val_sel) * (val_nc/val_sel) ;
+         hp -> SetBinError( xbi, q2bi, new_err ) ;
+      } // xbi
+   } // q2bi
+
+
+
+   TH2F* h_h1_rxsec = fill_h1_rxsec_th2() ;
+
+   TH2F* h_h1_rxsec_stat_error = (TH2F*) gDirectory -> Get( "h_h1_rxsec_stat_error" ) ;
+   if ( h_h1_rxsec_stat_error == 0x0 ) { printf("\n\n *** can't find h_h1_rxsec_stat_error.\n\n") ; return 0x0 ; }
+
+
+   TH2F* h_rxsec = calc_reduced_xsec_from_q2_vs_x( h_q2_vs_x_gen_no_cuts, h_h1_rxsec, h_h1_rxsec_stat_error ) ;
+   //TH2F* h_rxsec = calc_reduced_xsec_from_q2_vs_x( h_q2_vs_x_gen_no_cuts ) ;
+
+
+   h_rxsec -> Draw("colz") ;
+   gPad -> SetLogx(1) ;
+   gPad -> SetLogy(1) ;
+
+   return h_rxsec ;
+
+
+}
+
+
+

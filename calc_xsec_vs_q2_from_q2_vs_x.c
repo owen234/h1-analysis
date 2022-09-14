@@ -41,7 +41,7 @@
 
       h_xsec_vs_q2 -> Draw() ;
 
-      return 0x0 ;
+      return h_xsec_vs_q2 ;
 
 
    }

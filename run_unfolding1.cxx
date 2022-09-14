@@ -2,6 +2,7 @@
 #include "histio.c"
 #include "utils.c"
 #include "draw_2d_slices.c"
+#include "print_th2_table.c"
 
 #include "TCanvas.h"
 #include "TGraph.h"
@@ -12,6 +13,7 @@
 #include "RooUnfoldResponse.h"
 #include "RooUnfoldBayes.h"
 #include "RooUnfoldTUnfold.h"
+#include "RooUnfoldSvd.h"
 #endif
 
 using namespace RooUnfolding ;
@@ -35,7 +37,7 @@ void zero_unused_bins( TH1*  hp, RooUnfoldResponse* rur ) {
          int global_bin = findBin( hp, x, y ) ;
          if ( unused_global_bins.find( global_bin ) != unused_global_bins.end() ) {
              printf(" zero_unused_bins : zeroing bin  %2d, %2d  (%9.4f, %9.4f) :  content is %9.3f +/- %9.3f\n",
-                i, j, hp -> GetXaxis() -> GetBinCenter(i), hp -> GetYaxis() -> GetBinCenter(i),
+                i, j, hp -> GetXaxis() -> GetBinCenter(i), hp -> GetYaxis() -> GetBinCenter(j),
                 hp -> GetBinContent( i, j ), hp -> GetBinError( i, j ) ) ;
              hp -> SetBinContent( i, j, 0. ) ;
              hp -> SetBinError( i, j, 0. ) ;
@@ -53,7 +55,7 @@ TH2F* trim_unused_bins( TH2F* hp, RooUnfoldResponse* rur ) {
       TH1* h_gen_source = rur -> Htruth() ;
       for ( int i=1; i<=h_gen_source->GetNbinsX(); i++ ) {
          double x = h_gen_source->GetXaxis()->GetBinCenter( i ) ;
-         for ( int j=1; j<=h_gen_source->GetNbinsX(); j++ ) {
+         for ( int j=1; j<=h_gen_source->GetNbinsY(); j++ ) {
             double y = h_gen_source->GetYaxis()->GetBinCenter( j ) ;
             float entries = h_gen_source -> GetBinContent( i, j ) ;
             if ( entries < 1. ) {
@@ -67,7 +69,7 @@ TH2F* trim_unused_bins( TH2F* hp, RooUnfoldResponse* rur ) {
       ///      printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing edge bin.  global_bin %3d\n", i, j, x, y, global_bin ) ;
       ///      unused_global_bins.insert( global_bin ) ;
       ///   }
-            if ( j < 3 || j == h_gen_source->GetNbinsX() ) {
+            if ( j < 3 || j == h_gen_source->GetNbinsY() ) {
                //////int global_bin = rur -> FindBin( (TH1*) h_gen_source, x, y ) ;
                int global_bin = findBin( (TH1*) h_gen_source, x, y ) ;
                printf("  trim_unused_bins:  %2d, %2d  (%9.5f, %9.5f)  removing edge bin.  global_bin %3d\n", i, j, x, y, global_bin ) ;
@@ -167,9 +169,10 @@ int main() {
                      const char* data_input_file = "fake-data-max-stats-h1-binning.root" ;
                      const char* response_input_file = "unfold-hists-h1-binning.root" ;
                      const char* vary_vs_varx_string = "q2_vs_x" ;
-                     int method_index = 2 ;
+                     float svd_kterm = 150. ;
+                     int method_index = 3 ;
                      //int n_iter = 1000 ; // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
-                     int n_iter = 200 ; // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
+                     int n_iter = 40 ;
 
       char rur_name_base[100] ;
       sprintf( rur_name_base, "rur_2D_%s", vary_vs_varx_string ) ;
@@ -348,6 +351,10 @@ int main() {
       } else if ( method_index == 2 ) {
          unfold_a = new RooUnfoldTUnfold( rur_a, h_obs_data_a ) ;
          unfold_b = new RooUnfoldTUnfold( rur_b, h_obs_data_b ) ;
+      } else if ( method_index == 3 ) {
+         unfold_a = new RooUnfoldSvd( rur_a, h_obs_data_a, svd_kterm ) ;
+         unfold_b = new RooUnfoldSvd( rur_b, h_obs_data_b, svd_kterm ) ;
+
       } else {
          printf("\n\n *** I don't know method_index = %d\n\n", method_index ) ;
          return -1 ;
@@ -360,6 +367,9 @@ int main() {
       TH1* hReco_a = (TH1*) unfold_a -> Hunfold() ;
       TH1* hReco_b = (TH1*) unfold_b -> Hunfold() ;
 
+      printf("\n\n\n ========== Unfolding output histogram from method a\n\n") ;
+      print_th2_table( (TH2F*) hReco_a ) ;
+      printf("\n\n\n ==========================================================\n\n") ;
 
       TH1* hReco_ac_a = (TH1*) hReco_a -> Clone( "hReco_ac_a" ) ;
       TH1* hReco_ac_b = (TH1*) hReco_b -> Clone( "hReco_ac_b" ) ;
@@ -586,7 +596,7 @@ int main() {
       printf("\n\n B: Unfolding results:\n") ;
       for ( int i=0; i<unfolding_val_b.GetNrows(); i++ ) {
          if ( unfolding_err_b[i] == 0 ) continue ;
-         printf("A: global bin %3d :  gen = %9.3f, unfold =  %9.3f +/- %9.3f, diff = %9.3f,  diff/err = %9.3f  global correlation %9.3f\n",
+         printf("B: global bin %3d :  gen = %9.3f, unfold =  %9.3f +/- %9.3f, diff = %9.3f,  diff/err = %9.3f  global correlation %9.3f\n",
             i, gen_val_b[i], unfolding_val_b[i], unfolding_err_b[i], (unfolding_val_b[i]-gen_val_b[i]),
             (unfolding_val_b[i]-gen_val_b[i])/unfolding_err_b[i],
             h_global_correlation_coeff_b->GetBinContent( i+1 ) ) ;
@@ -740,6 +750,10 @@ int main() {
       TExec* change_cor_palette = new TExec( "change_cor_palette", "SetupCorrelationPalette();" );
 
 
+      printf("\n\n\n ========== Unfolding output histogram from method a, just before zero_unused_bins\n\n") ;
+      print_th2_table( (TH2F*) hReco_a ) ;
+      printf("\n\n\n ==========================================================\n\n") ;
+
 
       printf("\n\n Zeroing unused bins for a:\n") ;
       zero_unused_bins( hReco_a, rur_a ) ;
@@ -747,6 +761,10 @@ int main() {
       zero_unused_bins( hReco_b, rur_b ) ;
       printf("\n\n") ;
 
+
+      printf("\n\n\n ========== Unfolding output histogram from method a, just after zero_unused_bins\n\n") ;
+      print_th2_table( (TH2F*) hReco_a ) ;
+      printf("\n\n\n ==========================================================\n\n") ;
 
 
 
@@ -866,8 +884,8 @@ int main() {
 
       can1 -> Update() ;
       can1 -> Draw() ;
-      can1 -> SaveAs("mytest2-can1.pdf") ;
-      can1 -> SaveAs("mytest2_can1.C") ;
+      can1 -> SaveAs("run_unfolding1-can1.pdf") ;
+      can1 -> SaveAs("run_unfolding1_can1.C") ;
       gSystem -> ProcessEvents() ;
 
 
@@ -909,8 +927,8 @@ int main() {
       can2 -> cd( ci++ ) ;
       draw_2d_slices( hReco_b, 1, htitle_b ) ;
 
-      can2 -> SaveAs("mytest2-can2.pdf") ;
-      can2 -> SaveAs("mytest2_can2.C") ;
+      can2 -> SaveAs("run_unfolding1-can2.pdf") ;
+      can2 -> SaveAs("run_unfolding1_can2.C") ;
 
    //-----------
 
@@ -942,8 +960,8 @@ int main() {
       draw_2d_slices( hReco_ac_b, 1, htitle_b ) ;
 
 
-      can3 -> SaveAs("mytest2-can3.pdf") ;
-      can3 -> SaveAs("mytest2_can3.C") ;
+      can3 -> SaveAs("run_unfolding1-can3.pdf") ;
+      can3 -> SaveAs("run_unfolding1_can3.C") ;
 
 
 
@@ -1018,8 +1036,8 @@ int main() {
 
       can4 -> Update() ; can4 -> Draw() ;
 
-      can4 -> SaveAs("mytest2-can4.pdf") ;
-      can4 -> SaveAs("mytest2_can4.C") ;
+      can4 -> SaveAs("run_unfolding1-can4.pdf") ;
+      can4 -> SaveAs("run_unfolding1_can4.C") ;
 
     //---------------
 
@@ -1057,10 +1075,14 @@ int main() {
       can5 -> Update() ; can5 -> Draw() ;
 
 
-      can5 -> SaveAs("mytest2-can5.pdf") ;
-      can5 -> SaveAs("mytest2_can5.C") ;
+      can5 -> SaveAs("run_unfolding1-can5.pdf") ;
+      can5 -> SaveAs("run_unfolding1_can5.C") ;
 
 
+
+      printf("\n\n\n ========== Unfolding output histogram from method a, just before Write\n\n") ;
+      print_th2_table( (TH2F*) hReco_a ) ;
+      printf("\n\n\n ==========================================================\n\n") ;
 
 
 
@@ -1071,7 +1093,9 @@ int main() {
 
     //------- Save outputs
 
-      TFile* tf_out = new TFile( "mt2-output.root", "RECREATE" ) ;
+      char outfname[1000] ;
+      sprintf( outfname, "ru1-output-method%d.root", method_index ) ;
+      TFile* tf_out = new TFile( outfname, "RECREATE" ) ;
 
       h_in_gen_vs_obs_a -> Write() ;
       hReco_a -> Write() ;

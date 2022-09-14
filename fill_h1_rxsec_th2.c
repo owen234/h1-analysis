@@ -1,3 +1,5 @@
+#ifndef fill_h1_rxsec_th2_c
+#define fill_h1_rxsec_th2_c
 
 #include "utils.c"
 
@@ -33,8 +35,12 @@
          hp -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_total_percent[pi]/100.) ) ;
          hp_q2_val -> SetBinContent( gbi, q2_val[pi] ) ;
          hp_x_val -> SetBinContent( gbi, x_val[pi] ) ;
-         hp_total_error -> SetBinContent( gbi, rxsec_err_total_percent[pi]/100. ) ;
-         hp_stat_error -> SetBinContent( gbi, rxsec_err_stat_percent[pi]/100. ) ;
+         //////////hp_total_error -> SetBinContent( gbi, rxsec_err_total_percent[pi]/100. ) ;
+         //////////hp_stat_error -> SetBinContent( gbi, rxsec_err_stat_percent[pi]/100. ) ;
+         hp_total_error -> SetBinContent( gbi, rxsec_val[pi]*(rxsec_err_total_percent[pi]/100.) ) ;
+         hp_stat_error -> SetBinContent( gbi, rxsec_val[pi]*(rxsec_err_stat_percent[pi]/100.) ) ;
+         hp_total_error -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_total_percent[pi]/100.) ) ;
+         hp_stat_error -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_stat_percent[pi]/100.) ) ;
       } // pi
       printf("\n\n") ;
 
@@ -76,8 +82,12 @@
          hp -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_total_percent[pi]/100.) ) ;
          hp_q2_val -> SetBinContent( gbi, q2_val[pi] ) ;
          hp_x_val -> SetBinContent( gbi, x_val[pi] ) ;
-         hp_total_error -> SetBinContent( gbi, rxsec_err_total_percent[pi]/100. ) ;
-         hp_stat_error -> SetBinContent( gbi, rxsec_err_stat_percent[pi]/100. ) ;
+         /////////////hp_total_error -> SetBinContent( gbi, rxsec_err_total_percent[pi]/100. ) ;
+         /////////////hp_stat_error -> SetBinContent( gbi, rxsec_err_stat_percent[pi]/100. ) ;
+         hp_total_error -> SetBinContent( gbi, rxsec_val[pi]*(rxsec_err_total_percent[pi]/100.) ) ;
+         hp_stat_error -> SetBinContent( gbi, rxsec_val[pi]*(rxsec_err_stat_percent[pi]/100.) ) ;
+         hp_total_error -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_total_percent[pi]/100.) ) ;
+         hp_stat_error -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_stat_percent[pi]/100.) ) ;
       } // pi
       printf("\n\n") ;
 
@@ -88,6 +98,6 @@
 
 
 
-
+#endif
 
 
