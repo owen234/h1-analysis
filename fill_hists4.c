@@ -3,6 +3,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TStopwatch.h>
 
 #include "utils.c"
 #include "histio.c"
@@ -46,8 +47,9 @@ void fill_hists4::Loop( bool verbose, int last_event, int first_event, const cha
    float good_range_q2max = 50000 ;
 
 
-
-
+   TStopwatch tsw ;
+   tsw.Start() ;
+   double total_time(0.) ;
 
    printf("\n\n") ;
 
@@ -160,9 +162,12 @@ void fill_hists4::Loop( bool verbose, int last_event, int first_event, const cha
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if ( !verbose && ei%100 == 0 ) {
-         printf(" --- Event: %7d / %lld    %6.3f\r", ei, nentries, (1.*ei)/(1.*nentries) ) ;
+      if ( !verbose && ei%1000 == 0 ) {
+	 tsw.Stop() ;
+	 total_time += tsw.RealTime() ;
+         printf(" --- Event: %7d / %lld    %6.3f    %.1f seconds\r", ei, nentries, (1.*ei)/(1.*nentries), total_time ) ;
          fflush(stdout) ;
+	 tsw.Start() ;
       }
 
 
