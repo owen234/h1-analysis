@@ -154,6 +154,10 @@ void fill_hists4::Loop( bool verbose, int last_event, int first_event, const cha
 
    Long64_t nbytes = 0, nb = 0;
 
+   TStopwatch tsw_loop ;
+   double total_time_loop(0.) ;
+   tsw_loop.Stop() ;
+
    for (Long64_t jentry=first_event; jentry<nentries;jentry++) {
 
       int ei = jentry ;
@@ -162,12 +166,19 @@ void fill_hists4::Loop( bool verbose, int last_event, int first_event, const cha
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if ( !verbose && ei%1000 == 0 ) {
+      if ( !verbose && ei%100000 == 0 ) {
 	 tsw.Stop() ;
+	 tsw_loop.Stop() ;
 	 total_time += tsw.RealTime() ;
-         printf(" --- Event: %7d / %lld    %6.3f    %.1f seconds\r", ei, nentries, (1.*ei)/(1.*nentries), total_time ) ;
+	 total_time_loop += tsw_loop.RealTime() ;
+	 float rate_inverse = 1. ;
+	 if ( ei > 0 ) rate_inverse = total_time_loop / ei ;
+         float eta = (1.*nentries - 1.*ei) * rate_inverse ;
+         printf(" --- Event: %7d / %lld    %6.1f %% complete    %.1f seconds total,  %.1f seconds loop,  rate  %9.1f evt/s,  ETA %.1f seconds                 \r",
+			  ei, nentries, 100*(1.*ei)/(1.*nentries), total_time, total_time_loop, 1./rate_inverse, eta ) ;
          fflush(stdout) ;
 	 tsw.Start() ;
+	 tsw_loop.Start() ;
       }
 
 
