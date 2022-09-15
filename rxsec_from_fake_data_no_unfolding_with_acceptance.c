@@ -4,13 +4,14 @@
 #include "fill_h1_rxsec_th2.c"
 #include "utils.c"
 
-TH2F* rxsec_from_fake_data_no_unfolding_with_acceptance() {
+TH2F* rxsec_from_fake_data_no_unfolding_with_acceptance( const char* infile = "unfold-hists-h1-binning.root" ) {
 
    gStyle -> SetOptStat(0) ;
 
    ///////////gDirectory -> Delete() ;
 
-   loadHist("unfold-hists-h1-binning.root") ;
+   //loadHist("unfold-hists-h1-binning.root") ;
+   loadHist( infile ) ;
 
    TH2F* h_q2_vs_x_gen_no_cuts = (TH2F*) get_hist2d( "h_q2_vs_x_gen_no_cuts" ) ;
    TH2F* h_q2_vs_x_gen_dnn_sel = (TH2F*) get_hist2d( "h_q2_vs_x_gen_dnn_sel" ) ;

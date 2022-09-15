@@ -3,13 +3,14 @@
 #include "calc_reduced_xsec_from_q2_vs_x.c"
 #include "fill_h1_rxsec_th2.c"
 
-TH2F* rxsec_from_fake_data_no_unfolding() {
+TH2F* rxsec_from_fake_data_no_unfolding( const char* infile = "unfold-hists-h1-binning.root" ) {
 
    gStyle -> SetOptStat(0) ;
 
    /////////////gDirectory -> Delete() ;
 
-   loadHist("unfold-hists-h1-binning.root") ;
+   //loadHist("unfold-hists-h1-binning.root") ;
+   loadHist( infile ) ;
 
    TH2F* h_q2_vs_x_gen_no_cuts = (TH2F*) gDirectory -> FindObject( "h_q2_vs_x_gen_no_cuts" ) ;
    if ( h_q2_vs_x_gen_no_cuts == 0x0 ) {

@@ -3,7 +3,7 @@
 #include "calc_reduced_xsec_from_q2_vs_x.c"
 #include "fill_h1_rxsec_th2.c"
 
-TH2F* rxsec_from_unfolding( const char* hist_file = "ru1-output-method2.root") {
+TH2F* rxsec_from_unfolding( const char* hist_file = "ru1-output-method3.root") {
 
    gStyle -> SetOptStat(0) ;
 

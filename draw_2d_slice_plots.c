@@ -18,19 +18,22 @@
       int nbx = hp -> GetNbinsX() ;
       int nby = hp -> GetNbinsY() ;
 
+      int nbx2(0) ;
+      if ( hp2 != 0x0 ) nbx2 = hp2 -> GetNbinsX() ;
 
-      ///////int first_xbin = 2 ;
+      printf(" nbx = %d  nbx2 = %d\n", nbx, nbx2 ) ;
+
       int first_xbin = 1 ;
-      ///////int last_xbin = nbx-1 ;
       int last_xbin = nbx ;
 
-      ///////int first_ybin = 2 ;
+      int first_xbin2 = 1 ;
+      int last_xbin2 = nbx2 ;
+
       int first_ybin = 3 ;
       int last_ybin = nby-1 ;
 
-      /////////float xaxis_min = hp -> GetXaxis() -> GetBinLowEdge( first_xbin ) ;
-      /////////float xaxis_max = hp -> GetXaxis() -> GetBinLowEdge( last_xbin + 1 ) ;
       int nbins_slice = last_xbin - first_xbin + 1 ;
+      int nbins2_slice = last_xbin2 - first_xbin2 + 1 ;
 
 
       float hist_max = hp -> GetMaximum() ;
@@ -65,10 +68,15 @@
          double x_errs[50] ;
          double rxsec_vals[50] ;
          double rxsec_errs[50] ;
+
+         double x2_vals[50] ;
+         double x2_errs[50] ;
          double rxsec2_vals[50] ;
          double rxsec2_errs[50] ;
 
-         int gpai = 0 ;
+         int ngp(0) ;
+         int ngp2(0) ;
+
 
          can -> cd( cpi ) ;
 
@@ -81,39 +89,91 @@
          sprintf( hname, "%s_yb%02d_2", hp -> GetName(), ybi ) ;
          TH1F* h1dslice2 = new TH1F( hname, hname, nbins_slice, hp -> GetXaxis() -> GetXbins() -> GetArray() ) ;
 
-         for ( int xbi = first_xbin; xbi <= last_xbin; xbi ++ ) {
-            float xaxis_val = hp -> GetXaxis() -> GetBinCenter( xbi ) ;
-            int slice_bin = h1dslice -> FindBin( xaxis_val ) ;
-            h1dslice -> SetBinContent( slice_bin, hp -> GetBinContent( xbi, ybi ) ) ;
-            h1dslice -> SetBinError( slice_bin, hp -> GetBinError( xbi, ybi ) ) ;
-            if ( hp -> GetBinContent( xbi, ybi ) > 0 ) {
-               x_vals[gpai] = xaxis_val ;
-               x_errs[gpai] = 0.5 * (hp -> GetXaxis() -> GetBinWidth( xbi ) ) ;
-               rxsec_vals[gpai] = hp -> GetBinContent( xbi, ybi ) ;
-               rxsec_errs[gpai] = hp -> GetBinError( xbi, ybi ) ;
+         if ( nbx == nbx2 ) {
+
+            int gpai = 0 ;
+
+            for ( int xbi = first_xbin; xbi <= last_xbin; xbi ++ ) {
+               float xaxis_val = hp -> GetXaxis() -> GetBinCenter( xbi ) ;
+               int slice_bin = h1dslice -> FindBin( xaxis_val ) ;
+               h1dslice -> SetBinContent( slice_bin, hp -> GetBinContent( xbi, ybi ) ) ;
+               h1dslice -> SetBinError( slice_bin, hp -> GetBinError( xbi, ybi ) ) ;
+               if ( hp -> GetBinContent( xbi, ybi ) > 0 ) {
+                  x_vals[gpai] = xaxis_val ;
+                  x_errs[gpai] = 0.5 * (hp -> GetXaxis() -> GetBinWidth( xbi ) ) ;
+                  x2_vals[gpai] = xaxis_val ;
+                  x2_errs[gpai] = 0.5 * (hp -> GetXaxis() -> GetBinWidth( xbi ) ) ;
+                  rxsec_vals[gpai] = hp -> GetBinContent( xbi, ybi ) ;
+                  rxsec_errs[gpai] = hp -> GetBinError( xbi, ybi ) ;
+                  if ( hp2 != 0x0 ) {
+                     rxsec2_vals[gpai] = hp2 -> GetBinContent( xbi, ybi ) ;
+                     rxsec2_errs[gpai] = hp2 -> GetBinError( xbi, ybi ) ;
+                  }
+                  gpai ++ ;
+               }
                if ( hp2 != 0x0 ) {
+                  h1dslice2 -> SetBinContent( slice_bin, hp2 -> GetBinContent( xbi, ybi ) ) ;
+                  h1dslice2 -> SetBinError( slice_bin, hp2 -> GetBinError( xbi, ybi ) ) ;
                   rxsec2_vals[gpai] = hp2 -> GetBinContent( xbi, ybi ) ;
                   rxsec2_errs[gpai] = hp2 -> GetBinError( xbi, ybi ) ;
                }
-               gpai ++ ;
-            }
-            if ( hp2 != 0x0 ) {
+               printf("  xbi %3d, x val %9.5f, bin %2d : %9.3f +/- %5.3f |  ", xbi, xaxis_val, slice_bin, hp -> GetBinContent( xbi, ybi ), hp -> GetBinError( xbi, ybi ) ) ;
+               if ( hp2 != 0x0 ) {
+                  float ratio = 0. ;
+                  float err1 = hp -> GetBinError( xbi, ybi ) ;
+                  float err2 = hp2 -> GetBinError( xbi, ybi ) ;
+                  if ( err1 > 0 && err2 > 0 ) ratio = err2 / err1 ;
+                  printf("  %9.3f +/- %5.3f  |  err ratio:  %6.3f", hp2 -> GetBinContent( xbi, ybi ), hp2 -> GetBinError( xbi, ybi ), ratio ) ;
+               }
+               printf("\n") ;
+            } // xbi
+            printf("\n") ;
+
+            ngp = gpai ;
+            ngp2 = gpai ;
+
+         } else {
+
+            int gpai = 0 ;
+
+            for ( int xbi = first_xbin; xbi <= last_xbin; xbi ++ ) {
+               float xaxis_val = hp -> GetXaxis() -> GetBinCenter( xbi ) ;
+               int slice_bin = h1dslice -> FindBin( xaxis_val ) ;
+               h1dslice -> SetBinContent( slice_bin, hp -> GetBinContent( xbi, ybi ) ) ;
+               h1dslice -> SetBinError( slice_bin, hp -> GetBinError( xbi, ybi ) ) ;
+               if ( hp -> GetBinContent( xbi, ybi ) > 0 ) {
+                  x_vals[gpai] = xaxis_val ;
+                  x_errs[gpai] = 0.5 * (hp -> GetXaxis() -> GetBinWidth( xbi ) ) ;
+                  rxsec_vals[gpai] = hp -> GetBinContent( xbi, ybi ) ;
+                  rxsec_errs[gpai] = hp -> GetBinError( xbi, ybi ) ;
+                  gpai ++ ;
+               }
+               printf(" h1: xbi %3d, x val %9.5f, bin %2d : %9.3f +/- %5.3f |  \n", xbi, xaxis_val, slice_bin, hp -> GetBinContent( xbi, ybi ), hp -> GetBinError( xbi, ybi ) ) ;
+            } // xbi
+            printf("\n") ;
+            ngp = gpai ;
+
+            gpai = 0 ;
+            for ( int xbi = first_xbin2; xbi <= last_xbin2; xbi ++ ) {
+               float xaxis_val = hp2 -> GetXaxis() -> GetBinCenter( xbi ) ;
+               int slice_bin = h1dslice2 -> FindBin( xaxis_val ) ;
                h1dslice2 -> SetBinContent( slice_bin, hp2 -> GetBinContent( xbi, ybi ) ) ;
                h1dslice2 -> SetBinError( slice_bin, hp2 -> GetBinError( xbi, ybi ) ) ;
-               rxsec2_vals[gpai] = hp2 -> GetBinContent( xbi, ybi ) ;
-               rxsec2_errs[gpai] = hp2 -> GetBinError( xbi, ybi ) ;
-            }
-            printf("  xbi %3d, x val %9.5f, bin %2d : %9.3f +/- %5.3f |  ", xbi, xaxis_val, slice_bin, hp -> GetBinContent( xbi, ybi ), hp -> GetBinError( xbi, ybi ) ) ;
-            if ( hp2 != 0x0 ) {
-               float ratio = 0. ;
-               float err1 = hp -> GetBinError( xbi, ybi ) ;
-               float err2 = hp2 -> GetBinError( xbi, ybi ) ;
-               if ( err1 > 0 && err2 > 0 ) ratio = err2 / err1 ;
-               printf("  %9.3f +/- %5.3f  |  err ratio:  %6.3f", hp2 -> GetBinContent( xbi, ybi ), hp2 -> GetBinError( xbi, ybi ), ratio ) ;
-            }
+               if ( hp2 -> GetBinContent( xbi, ybi ) > 0 ) {
+                  x2_vals[gpai] = xaxis_val ;
+                  x2_errs[gpai] = 0.5 * (hp2 -> GetXaxis() -> GetBinWidth( xbi ) ) ;
+                  rxsec2_vals[gpai] = hp2 -> GetBinContent( xbi, ybi ) ;
+                  rxsec2_errs[gpai] = hp2 -> GetBinError( xbi, ybi ) ;
+                  gpai ++ ;
+               }
+               printf(" h2: xbi %3d, x val %9.5f, bin %2d : %9.3f +/- %5.3f |  \n", xbi, xaxis_val, slice_bin, hp2 -> GetBinContent( xbi, ybi ), hp2 -> GetBinError( xbi, ybi ) ) ;
+            } // xbi
             printf("\n") ;
-         } // xbi
-         printf("\n") ;
+            ngp2 = gpai ;
+
+         }
+
+
 
          //////h1dslice -> SetLineColor( 11 + ybi ) ;
          h1dslice -> SetLineColor( 1 ) ;
@@ -154,7 +214,7 @@
             }
             ////////////h1dslice -> DrawCopy("p") ;
             h1dslice -> DrawCopy("axis") ;
-            TGraphErrors* tge = new TGraphErrors( gpai, x_vals, rxsec_vals, x_errs, rxsec_errs ) ;
+            TGraphErrors* tge = new TGraphErrors( ngp, x_vals, rxsec_vals, x_errs, rxsec_errs ) ;
             tge -> SetMarkerStyle(25) ;
             tge -> SetMarkerSize(0.5) ;
             tge -> SetLineWidth(2) ;
@@ -164,7 +224,7 @@
             if ( hp2 != 0x0 ) {
                //////h1dslice2 -> DrawCopy( "same" ) ;
                //////h1dslice2 -> DrawCopy( "hist l same" ) ;
-               TGraphErrors* tge2 = new TGraphErrors( gpai, x_vals, rxsec2_vals, x_errs, rxsec2_errs ) ;
+               TGraphErrors* tge2 = new TGraphErrors( ngp2, x2_vals, rxsec2_vals, x2_errs, rxsec2_errs ) ;
                tge2 -> SetMarkerStyle(20) ;
                tge2 -> SetMarkerSize(0.5) ;
                tge2 -> SetLineColor(2) ;
