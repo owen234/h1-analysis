@@ -46,6 +46,13 @@
       return rp ;
    }
 
+   TH2Poly* fget_hist2dp( const char* hname, TFile* tfp ) {
+      if ( tfp == 0x0 ) { printf("\n\n *** fget_hist : bad file pointer.\n\n") ; gSystem -> Exit(-1) ; }
+      TH2Poly* rp = (TH2Poly*) tfp -> Get( hname ) ;
+      if ( rp == 0x0 ) { printf("\n\n *** Missing hist %s\n\n", hname ) ; gSystem -> Exit(-1) ; }
+      return rp ;
+   }
+
    TGraph* get_graph( const char* gname ) {
       TGraph* rp = (TGraph*) gDirectory -> FindObject( gname ) ;
       if ( rp == 0x0 ) { printf("\n\n *** Missing TGraph %s\n\n", gname ) ; gSystem -> Exit(-1) ; }
@@ -55,6 +62,19 @@
    void grid_on() {
       gPad -> SetGridx(1) ;
       gPad -> SetGridy(1) ;
+   }
+
+   void logxy_on() {
+      gPad -> SetLogx(1) ;
+      gPad -> SetLogy(1) ;
+   }
+
+   void stats_off() {
+      gStyle -> SetOptStat(0) ;
+   }
+
+   void set_tf( const char* tf="5.3f" ) {
+      gStyle -> SetPaintTextFormat( tf ) ;
    }
 
 
@@ -267,7 +287,24 @@
    }
 
 
+  //==========================================================================
 
+   void dump_th2poly( TH2Poly* hp ) {
+      if ( hp == 0x0 ) return ;
+      printf("\n\n Dumping the bins of %s\n", hp -> GetName() ) ;
+      TList* tl = hp -> GetBins() ;
+      int nbins = tl -> GetEntries() ;
+      printf("  Has %d bins\n", nbins ) ;
+      for ( int bi=0; bi<nbins; bi++ ) {
+         TH2PolyBin* thpb = (TH2PolyBin*) tl->At(bi) ;
+         printf("  bin %3d :  val = %9.5f    horizontal axis range [%9.5f, %9.5f]  vertical axis range [%9.1f, %9.1f]\n",
+             bi, thpb->GetContent(),
+             thpb->GetXMin(),
+             thpb->GetXMax(),
+             thpb->GetYMin(),
+             thpb->GetYMax() ) ;
+      } // bi
+   }
 
 #endif
 

@@ -169,7 +169,7 @@ int main() {
                      const char* data_input_file = "fake-data-max-stats-h1-binning.root" ;
                      const char* response_input_file = "unfold-hists-h1-binning.root" ;
                      const char* vary_vs_varx_string = "q2_vs_x" ;
-                     float svd_kterm = 150. ;
+                     float svd_kterm = 1000. ;
                      int method_index = 3 ;
                      //int n_iter = 1000 ; // this is huge because I hacked RooUnfoldBayes to start with a flat prior.
                      int n_iter = 40 ;

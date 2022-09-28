@@ -2,19 +2,19 @@
 
 #include "fill_h1_rxsec_th2.c"
 #include "draw_2d_slice_plots.c"
-#include "rxsec_from_mc.c"
+#include "rxsec_from_mc_bcc_given_center.c"
 #include "rxsec_from_fake_data_no_unfolding.c"
 #include "rxsec_from_fake_data_no_unfolding_with_acceptance.c"
 #include "rxsec_from_unfolding.c"
 
-void draw_rxsec_slices( const char* infile = "unfold-hists-h1-binning.root", const char* unfolding_input = "ru1-output-method2-v4b.root", bool do_logx=true  ) {
+void draw_rxsec_slices_bcc_given_center( const char* infile = "unfold-hists-h1-binning.root", const char* unfolding_input = "ru1-output-method2-v4b.root", bool do_logx=true  ) {
 
    gDirectory -> Delete( "h*" ) ;
 
    TH2F* hp_h1 = fill_h1_rxsec_th2() ;
 
    //TH2F* hp_mc = 0x0 ;
-   TH2F* hp_mc = rxsec_from_mc( infile ) ;
+   TH2F* hp_mc = rxsec_from_mc_bcc_given_center( infile ) ;
    //TH2F* hp_mc = rxsec_from_fake_data_no_unfolding( infile ) ;
    //TH2F* hp_mc = rxsec_from_fake_data_no_unfolding_with_acceptance( infile ) ;
    //TH2F* hp_mc = rxsec_from_unfolding( unfolding_input ) ;
@@ -25,9 +25,12 @@ void draw_rxsec_slices( const char* infile = "unfold-hists-h1-binning.root", con
 
    hp_mc -> Draw("colz") ;
 
-
    draw_2d_slice_plots(hp_h1, hp_mc, do_logx ) ;
    //draw_2d_slice_plots(hp_mc) ;
+
+   gStyle -> SetPadTopMargin(0.10) ;
+   gStyle -> SetPadRightMargin(0.12) ;
+   gStyle -> SetPadLeftMargin(0.10) ;
 
    gStyle -> SetPadTopMargin(0.10) ;
    gStyle -> SetPadRightMargin(0.12) ;
@@ -43,6 +46,7 @@ void draw_rxsec_slices( const char* infile = "unfold-hists-h1-binning.root", con
    logxy_on() ;
    set_tf() ;
    hp_ratio -> Draw("text same") ;
+
 
 }
 

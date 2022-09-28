@@ -167,9 +167,9 @@ fill_data3::fill_data3(TTree *tree) : fChain(0)
 #ifdef SINGLE_TREE
       // The following code should be used if you want this class to access
       // a single tree instead of a chain
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dnn-output-h1-v2-Data_nominal.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dnn-output-h1-v2-Data.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("dnn-output-h1-v2-Data_nominal.root");
+         f = new TFile("dnn-output-h1-v2-Data.root");
       }
       f->GetObject("dnnout",tree);
 
@@ -178,7 +178,7 @@ fill_data3::fill_data3(TTree *tree) : fChain(0)
       // The following code should be used if you want this class to access a chain
       // of trees.
       TChain * chain = new TChain("dnnout","");
-      chain->Add("dnn-output-h1-v2-Data_nominal.root/dnnout");
+      chain->Add("dnn-output-h1-v2-Data.root/dnnout");
       tree = chain;
 #endif // SINGLE_TREE
 

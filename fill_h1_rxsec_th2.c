@@ -5,6 +5,8 @@
 
    TH2F* fill_h1_rxsec_th2() {
 
+      TH2F* hp_binning = make_q2_vs_x_h1_binning( "h_h1_q2_vs_x_binning" ) ;
+
       TH2F* hp = make_q2_vs_x_h1_binning( "h_h1_rxsec" ) ;
 
       TH2F* hp_q2_val = make_q2_vs_x_h1_binning( "h_h1_rxsec_q2_val" ) ;
@@ -44,6 +46,53 @@
       } // pi
       printf("\n\n") ;
 
+      //-- set a couple by hand
+      int nbq2 = hp_x_val -> GetNbinsY() ;
+      hp_x_val -> SetBinContent( 1, nbq2, 0.002 ) ;
+      hp_q2_val -> SetBinContent( 1, nbq2, 50000 ) ;
+
+    //--- fill in the extras (points in the histogram where there's no measurement in the H1 paper).
+      float extra_q2_val[50] ;
+      float extra_x_val[50] ;
+      int nextra(0) ;
+      extra_q2_val[nextra] = 1200. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] = 1000. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  800. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  650. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  500. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  400. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  300. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  250. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  200. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  500. ; extra_x_val[nextra] = 0.40 ;  nextra++ ;
+      extra_q2_val[nextra] =  250. ; extra_x_val[nextra] = 0.40 ;  nextra++ ;
+      extra_q2_val[nextra] =  200. ; extra_x_val[nextra] = 0.40 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  400. ; extra_x_val[nextra] = 0.25 ;  nextra++ ;
+      extra_q2_val[nextra] =  300. ; extra_x_val[nextra] = 0.25 ;  nextra++ ;
+      extra_q2_val[nextra] =  250. ; extra_x_val[nextra] = 0.25 ;  nextra++ ;
+      extra_q2_val[nextra] =  200. ; extra_x_val[nextra] = 0.25 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  800. ; extra_x_val[nextra] = 0.008 ;  nextra++ ;
+      extra_q2_val[nextra] =  650. ; extra_x_val[nextra] = 0.008 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  500. ; extra_x_val[nextra] = 0.005 ;  nextra++ ;
+      extra_q2_val[nextra] =  400. ; extra_x_val[nextra] = 0.005 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  250. ; extra_x_val[nextra] = 0.0032 ;  nextra++ ;
+      extra_q2_val[nextra] =  300. ; extra_x_val[nextra] = 0.0032 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  200. ; extra_x_val[nextra] = 0.0020 ;  nextra++ ;
+
+
+      for ( int pi=0; pi<nextra; pi++ ) {
+         int gbi = hp -> FindBin( extra_x_val[pi], extra_q2_val[pi] ) ;
+         printf(" extra -   %3d :  x = %9.5f, Q2 = %8.1f   gbi = %4d\n", pi, x_val[pi], q2_val[pi], gbi ) ;
+         hp_q2_val -> SetBinContent( gbi, extra_q2_val[pi] ) ;
+         hp_x_val -> SetBinContent( gbi, extra_x_val[pi] ) ;
+      } // pi
+
       return hp ;
 
    }
@@ -52,6 +101,8 @@
 
    TH2Poly* fill_h1_rxsec_th2_poly() {
 
+      TH2Poly* hp_binning = make_q2_vs_x_h1_binning_poly( "h_poly_h1_q2_vs_x_binning" ) ;
+
       TH2Poly* hp = make_q2_vs_x_h1_binning_poly( "h_poly_h1_rxsec" ) ;
 
       TH2Poly* hp_q2_val = make_q2_vs_x_h1_binning_poly( "h_poly_h1_rxsec_q2_val" ) ;
@@ -59,6 +110,7 @@
       TH2Poly* hp_total_error = make_q2_vs_x_h1_binning_poly( "h_poly_h1_rxsec_total_error" ) ;
       TH2Poly* hp_stat_error = make_q2_vs_x_h1_binning_poly( "h_poly_h1_rxsec_stat_error" ) ;
 
+      TH2Poly* hp_gbi = make_q2_vs_x_h1_binning_poly( "h_poly_h1_gbi" ) ;
 
      //--- numbers from Table 16, 1206.7007
 
@@ -90,6 +142,48 @@
          hp_stat_error -> SetBinError( gbi, rxsec_val[pi]*(rxsec_err_stat_percent[pi]/100.) ) ;
       } // pi
       printf("\n\n") ;
+
+    //--- fill in the extras (points in the histogram where there's no measurement in the H1 paper).
+      float extra_q2_val[50] ;
+      float extra_x_val[50] ;
+      int nextra(0) ;
+      extra_q2_val[nextra] = 1200. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] = 1000. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  800. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  650. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  500. ; extra_x_val[nextra] = 0.65 ;  nextra++ ;
+      extra_q2_val[nextra] =  250. ; extra_x_val[nextra] = 0.40 ;  nextra++ ;
+      extra_q2_val[nextra] =  200. ; extra_x_val[nextra] = 0.40 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  500. ; extra_x_val[nextra] = 0.40 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  800. ; extra_x_val[nextra] = 0.008 ;  nextra++ ;
+      extra_q2_val[nextra] =  650. ; extra_x_val[nextra] = 0.008 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  500. ; extra_x_val[nextra] = 0.005 ;  nextra++ ;
+      extra_q2_val[nextra] =  400. ; extra_x_val[nextra] = 0.005 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  250. ; extra_x_val[nextra] = 0.0032 ;  nextra++ ;
+      extra_q2_val[nextra] =  300. ; extra_x_val[nextra] = 0.0032 ;  nextra++ ;
+
+      extra_q2_val[nextra] =  200. ; extra_x_val[nextra] = 0.0020 ;  nextra++ ;
+
+
+      for ( int pi=0; pi<nextra; pi++ ) {
+         int gbi = hp -> FindBin( extra_x_val[pi], extra_q2_val[pi] ) ;
+         printf(" extra -   %3d :  x = %9.5f, Q2 = %8.1f   gbi = %4d\n", pi, x_val[pi], q2_val[pi], gbi ) ;
+         hp_q2_val -> SetBinContent( gbi, extra_q2_val[pi] ) ;
+         hp_x_val -> SetBinContent( gbi, extra_x_val[pi] ) ;
+      } // pi
+
+
+     //-- save global bin index values in a TH2Poly for convenience
+
+      TList* tl = hp_gbi -> GetBins() ;
+      int nbins = tl -> GetEntries() ;
+      for ( int bi=1; bi<=nbins; bi++ ) {
+         hp_gbi -> SetBinContent( bi, bi ) ;
+      } // bi
 
       return hp ;
 

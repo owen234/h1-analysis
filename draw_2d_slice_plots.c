@@ -1,6 +1,6 @@
 
 
-   void draw_2d_slice_plots( TH1* hp, TH1* hp2=0x0, bool do_logy = false, const char* htitle = "", bool do_logx = true, const char* can_name = "can_2d_slice_plots" ) {
+   void draw_2d_slice_plots( TH1* hp, TH1* hp2=0x0, bool do_logx=true, bool do_logy = false, const char* htitle = "", const char* can_name = "can_2d_slice_plots" ) {
 
 
 
@@ -119,11 +119,14 @@
                }
                printf("  xbi %3d, x val %9.5f, bin %2d : %9.3f +/- %5.3f |  ", xbi, xaxis_val, slice_bin, hp -> GetBinContent( xbi, ybi ), hp -> GetBinError( xbi, ybi ) ) ;
                if ( hp2 != 0x0 ) {
-                  float ratio = 0. ;
+                  float err_ratio = 0. ;
                   float err1 = hp -> GetBinError( xbi, ybi ) ;
                   float err2 = hp2 -> GetBinError( xbi, ybi ) ;
-                  if ( err1 > 0 && err2 > 0 ) ratio = err2 / err1 ;
-                  printf("  %9.3f +/- %5.3f  |  err ratio:  %6.3f", hp2 -> GetBinContent( xbi, ybi ), hp2 -> GetBinError( xbi, ybi ), ratio ) ;
+                  float val_ratio = 0. ;
+                  float val1 = hp -> GetBinContent( xbi, ybi ) ;
+                  float val2 = hp2 -> GetBinContent( xbi, ybi ) ;
+                  if ( val1 > 0 && val2 > 0 ) val_ratio = val2 / val1 ;
+                  printf("  %9.3f +/- %5.3f  |  val ratio:  %6.3f  err ratio:  %6.3f", hp2 -> GetBinContent( xbi, ybi ), hp2 -> GetBinError( xbi, ybi ), val_ratio, err_ratio ) ;
                }
                printf("\n") ;
             } // xbi
@@ -209,8 +212,11 @@
                h1dslice -> SetMaximum( 340.2 * hist_max ) ;
                h1dslice -> SetMinimum( 1. ) ;
             } else {
-               ///////////h1dslice -> SetMaximum( 1.7 * hist_max ) ;
-               h1dslice -> SetMaximum( 1.5 ) ;
+               if ( do_logx ) {
+                  h1dslice -> SetMaximum( 1.5 ) ;
+               } else {
+                  h1dslice -> SetMaximum( 0.5 ) ;
+               }
             }
             ////////////h1dslice -> DrawCopy("p") ;
             h1dslice -> DrawCopy("axis") ;
