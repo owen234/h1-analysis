@@ -6,4 +6,4 @@ The H1 legacy papers use Bin Center Corrections (BCCs).  We probably won't use t
 import pandas as pd
 df = pd.read_fwf("bin-center-corrections-table.txt")
 ```
- 
+If we do a new measurement, which will be an average cross section within the bin (i.e. something proportional to Ncounts / (Lumi * bin_area)) to compare with the H1 bin-centered points, you will need the BCC_area column of the table, which is defined as the ratio of the cross section at the center divided by the average cross section within the bin.  Divide the H1 measurement by BCC_area to undo the BCC in the H1 measurement. 
