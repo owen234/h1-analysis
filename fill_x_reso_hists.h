@@ -176,7 +176,7 @@ public :
    TBranch        *b_dnn_y;   //!
    TBranch        *b_dnn_Q2;   //!
 
-   fill_x_reso_hists( const char* input_file_pattern = "dnn-output-h1-v2-Rapgap.root" );
+   fill_x_reso_hists( const char* input_file_pattern = "dnn-output-h1-v2-Rapgap-all-events.root" );
    //fill_x_reso_hists( const char* input_file_pattern = "/Volumes/Ext_2020_08/dis-reco-work/h1-2021-10-14-v5f/dnn-output-h1-v2-Rapgap-all-events.root" );
    virtual ~fill_x_reso_hists();
    virtual Int_t    Cut(Long64_t entry);
