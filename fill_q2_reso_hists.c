@@ -10,6 +10,10 @@
 void fill_q2_reso_hists::Loop( bool fine_binning, bool verbose, int last_event, int first_event, const char* out_file )
 {
 
+   TStopwatch tsw ;
+   tsw.Start() ;
+   double total_time(0.) ;
+
    //////float wgt = 1. ; // for athena only
 
    if (fChain == 0) return;
@@ -137,6 +141,10 @@ void fill_q2_reso_hists::Loop( bool fine_binning, bool verbose, int last_event, 
       nentries = last_event ;
    }
 
+   TStopwatch tsw_loop ;
+   double total_time_loop(0.) ;
+   tsw_loop.Stop() ;
+
    Long64_t nbytes = 0, nb = 0;
 
    for (Long64_t jentry=first_event; jentry<nentries;jentry++) {
@@ -147,9 +155,23 @@ void fill_q2_reso_hists::Loop( bool fine_binning, bool verbose, int last_event, 
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if ( !verbose && ei%100 == 0 ) {
-         printf(" --- Event: %7d / %lld    %6.3f\r", ei, nentries, (1.*ei)/(1.*nentries) ) ;
+      //if ( !verbose && ei%100 == 0 ) {
+      //   printf(" --- Event: %7d / %lld    %6.3f\r", ei, nentries, (1.*ei)/(1.*nentries) ) ;
+      //   fflush(stdout) ;
+      //}
+      if ( !verbose && ei%100000 == 0 ) {
+	 tsw.Stop() ;
+	 tsw_loop.Stop() ;
+	 total_time += tsw.RealTime() ;
+	 total_time_loop += tsw_loop.RealTime() ;
+	 float rate_inverse = 1. ;
+	 if ( ei > 0 ) rate_inverse = total_time_loop / ei ;
+         float eta = (1.*nentries - 1.*ei) * rate_inverse ;
+         printf(" --- Event: %7d / %lld    %6.1f %% complete    %.1f seconds total,  %.1f seconds loop,  rate  %9.1f evt/s,  ETA %.1f seconds                 \r",
+			  ei, nentries, 100*(1.*ei)/(1.*nentries), total_time, total_time_loop, 1./rate_inverse, eta ) ;
          fflush(stdout) ;
+	 tsw.Start() ;
+	 tsw_loop.Start() ;
       }
 
 
